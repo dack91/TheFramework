@@ -12,7 +12,7 @@ public class PlayerMovement : MonoBehaviour
     private bool isDead;
 
     public float force;
-    public float awarenessInterval = 3f;
+    public float awarenessInterval = 1f;
     private float awarenessLevel;
 
     // Current zone used to monitor and smoothly 
@@ -53,14 +53,14 @@ public class PlayerMovement : MonoBehaviour
         if (other.tag == "safe")
         {
             //   Debug.Log("safe");
-            currAwarenessZone = 0;
-            StartCoroutine(influenceAwareness(awarenessLevel, 0.0f, awarenessInterval, 0));
+            currAwarenessZone = 0;  
+            StartCoroutine(influenceAwareness(awarenessLevel, 0.0f, awarenessInterval * 2f, 0));
         }
         else if (other.tag == "warning")
         {
             //    Debug.Log("warning");
             currAwarenessZone = 1;
-            StartCoroutine(influenceAwareness(awarenessLevel, 0.5f, awarenessInterval, 1));
+            StartCoroutine(influenceAwareness(awarenessLevel, 0.5f, awarenessInterval * 1.5f, 1));
         }
         else if (other.tag == "alarm")
         {

@@ -10,56 +10,50 @@ public class GameManager : MonoBehaviour
 {
 
     public static GameManager GM;
+    public StartCanvasBehavior CV;
+
 
     // Second and Third game modes are locked at game start
     public Button staffButton; 
-    private bool staffIsUnlocked = false;
+    private bool staffIsUnlocked;
     public Button guestButton;
-    private bool guestIsUnlocked = false;
+    private bool guestIsUnlocked;
 
     private string currCharacter;
+    private int currGameMode;
     public PlayerMovement Player;
     public Slider PlayerAwareness;
     //public CanvasBehavior CV;
-    //public int maxLevels;
+    public int [] maxLevels;
     private bool isGameOver;
 
     private void Awake()
     {
+        Debug.Log("AWAKE");
         if (GM == null)
         {
             GM = this;
-
-            // DEBUG TMP:
-            if (SceneManager.GetActiveScene().name == "GameStart")
-            {
-                // AFTER DEBUG TMP, KEEP BUT REMOVE FROM IF GAME START STATEMENT
-                if (!staffIsUnlocked)
-                {
-                    staffButton.interactable = false;
-                }
-                if (!guestIsUnlocked)
-                {
-                    guestButton.interactable = false;
-                }
-            }
         }
         else if (GM != this)
         {
             Destroy(gameObject);
         }
 
-        DontDestroyOnLoad(gameObject); // Persist between levels
+        // Persist between levels
+        DontDestroyOnLoad(gameObject); 
     }
 
     // Use this for initialization
     void Start()
     {
-        //Player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerMovement>();
-        //Player.setSaves(savesLeft);
-        //CV = GameObject.FindGameObjectWithTag("UI").GetComponent<CanvasBehavior>();
-        //CV.setSaveText(savesLeft);
+        Debug.Log("START");
         isGameOver = false;
+        CV = GameObject.FindGameObjectWithTag("UI").GetComponent<StartCanvasBehavior>();
+        staffIsUnlocked = false;
+        guestIsUnlocked = false;
+
+        staffButton.interactable = staffIsUnlocked;
+        guestButton.interactable = guestIsUnlocked;
     }
 
     // Update is called once per frame
@@ -78,70 +72,60 @@ public class GameManager : MonoBehaviour
                 PlayerAwareness = GameObject.FindGameObjectWithTag("awarenessUI").GetComponent<Slider>();
                 updateAwarenessLevel(0.0f);
             }
-            //if (CV == null)
-            //{
-            //    CV = GameObject.FindGameObjectWithTag("UI").GetComponent<CanvasBehavior>();
-            //}
+            // Get input for player movement
+            float xMove = 0;
+            float yMove = 0;
+
+            if ((yMove = Input.GetAxis("Vertical")) != 0)
+            {
+              //  Debug.Log("y movement: " + Input.GetAxis("Vertical"));
+                Player.movePlayer(0, yMove);
+            }
+            if ((xMove = Input.GetAxis("Horizontal")) != 0) { 
+               // Debug.Log("x movement: " + Input.GetAxis("Horizontal"));
+                Player.movePlayer(xMove, 0);
+
+            }
         }
-        //else
-        //{
-        //    // Restart game
-        //    if (Input.GetKeyDown(KeyCode.R))
-        //    {
-        //        SceneManager.LoadScene("GameStart");
-        //        isGameOver = false;
-        //    }
-        //}
-
-        // Get input for player movement
-        float xMove = 0;
-        float yMove = 0;
-
-        if ((yMove = Input.GetAxis("Vertical")) != 0)
+        else
         {
-          //  Debug.Log("y movement: " + Input.GetAxis("Vertical"));
-            Player.movePlayer(0, yMove);
-        }
-        if ((xMove = Input.GetAxis("Horizontal")) != 0) { 
-           // Debug.Log("x movement: " + Input.GetAxis("Horizontal"));
-            Player.movePlayer(xMove, 0);
+            // Restart game
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                SceneManager.LoadScene("GameStart");
+                isGameOver = false;
+                CV.GetComponent<Canvas>().enabled = true;
 
+                //Debug.Log("staffB: " + staffIsUnlocked);
+                //Debug.Log("guestB: " + guestIsUnlocked);
+
+                staffButton.interactable = staffIsUnlocked;
+                guestButton.interactable = guestIsUnlocked;
+            }
+            if (CV == null)
+            {
+                CV = GameObject.FindGameObjectWithTag("UI").GetComponent<StartCanvasBehavior>();
+            }
         }
+
     }
 
     private void FixedUpdate()
     {
-        //if (!isGameOver)
-        //{
-        //    // Get input for player movement
-        //    float xMove = 0;
-        //    if ((xMove = Input.GetAxis("Horizontal")) != 0)
-        //    {
-        //        Player.movePlayer(xMove);
-        //    }
-        //    if (Input.GetKeyDown(KeyCode.Space) && !Player.getIsJumping())
-        //    {
-        //        Player.jump();
-        //    }
+    }
 
-        //    // Help player death save text
-        //    if (Player != null && CV != null &&
-        //        Player.isAirWarning &&
-        //        Player.getIsUncovered() &&
-        //    {
-        //        CV.showSaveHelpText();
-        //    }
-        //    else if (CV != null)
-        //    {
-        //        CV.hideSaveHelpText();
-        //    }
-        //}
+    // Set player choice for game mode
+    public void setGameMode(int mode)
+    {
+        currGameMode = mode;
     }
 
     // Load Level
     // string playerCharacter: identifier for game mode between host, staff, and guest
     public void loadNextLevel(string playerCharacter)
     {
+        CV.GetComponent<Canvas>().enabled = false;
+
         currCharacter = playerCharacter;
 
         Debug.Log("loading next level for: " + playerCharacter);
@@ -157,25 +141,24 @@ public class GameManager : MonoBehaviour
         // Cast level number to integer
         int lev = (int)char.GetNumericValue(currLevel) + 1;
 
-        // If last level, load game over scene
-        //if (lev > maxLevels)
-        //{
-        //    nextLevel = "GameOver";
-        //    isGameOver = true;
+        //If last level, load game over scene
+        if (lev > maxLevels[currGameMode])
+        {
+            nextLevel = "GameOver";
+            isGameOver = true;
 
-        //    // Destroy in game UI when moving to Game Over screen
-        //    GameObject canv = GameObject.FindGameObjectWithTag("UI");
-        //    if (canv != null)
-        //    {
-        //        Destroy(canv);
-        //    }
-        //}
+            if (currGameMode < 2)
+            {
+                Debug.Log("unlocking mode: " + currGameMode + 1);
+                unlockGameMode(currGameMode + 1);
+            }
+        }
         // Load next level
-        //else
-        //{
-        // Build string for next level
-        nextLevel = currCharacter + "_Level" + lev.ToString();
-        //}
+        else
+        {
+           // Build string for next level 
+           nextLevel = currCharacter + "_Level" + lev.ToString();
+        }
 
         Debug.Log("loading: " + nextLevel); 
 
@@ -208,6 +191,19 @@ public class GameManager : MonoBehaviour
             // Transition color from green to red as awareness increases
             PlayerAwareness.fillRect.GetComponent<Image>().color = 
                 Color.Lerp(Color.green, Color.red, currAwareness / 1.0f);
+        }
+    }
+
+    public void unlockGameMode(int mode)
+    {
+        switch(mode)
+        {
+            case 1:
+                staffIsUnlocked = true;
+                break;
+            case 2:
+                guestIsUnlocked = true;
+                break;
         }
     }
 
