@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.Linq;
 
 
 public class GameManager : MonoBehaviour
@@ -201,7 +202,12 @@ public class GameManager : MonoBehaviour
     {
         if (PlayerAwareness != null)
         {
+            // Set slider level between 0 and 1
             PlayerAwareness.value = currAwareness;
+
+            // Transition color from green to red as awareness increases
+            PlayerAwareness.fillRect.GetComponent<Image>().color = 
+                Color.Lerp(Color.green, Color.red, currAwareness / 1.0f);
         }
     }
 
