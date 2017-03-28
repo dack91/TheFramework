@@ -15,26 +15,32 @@ public class GameManager : MonoBehaviour
     private bool staffIsUnlocked = false;
     public Button guestButton;
     private bool guestIsUnlocked = false;
-    
 
     private string currCharacter;
-    //public PlayerMovement Player;
+    public PlayerMovement Player;
+    public Slider PlayerAwareness;
     //public CanvasBehavior CV;
     //public int maxLevels;
-    //private bool isGameOver;
+    private bool isGameOver;
 
     private void Awake()
     {
         if (GM == null)
         {
             GM = this;
-            if (!staffIsUnlocked)
+
+            // DEBUG TMP:
+            if (SceneManager.GetActiveScene().name == "GameStart")
             {
-                staffButton.interactable = false;
-            }
-            if (!guestIsUnlocked)
-            {
-                guestButton.interactable = false;
+                // AFTER DEBUG TMP, KEEP BUT REMOVE FROM IF GAME START STATEMENT
+                if (!staffIsUnlocked)
+                {
+                    staffButton.interactable = false;
+                }
+                if (!guestIsUnlocked)
+                {
+                    guestButton.interactable = false;
+                }
             }
         }
         else if (GM != this)
@@ -52,24 +58,30 @@ public class GameManager : MonoBehaviour
         //Player.setSaves(savesLeft);
         //CV = GameObject.FindGameObjectWithTag("UI").GetComponent<CanvasBehavior>();
         //CV.setSaveText(savesLeft);
-        //isGameOver = false;
+        isGameOver = false;
     }
 
     // Update is called once per frame
     void Update()
     {
-        //if (!isGameOver)
-        //{
-        //    // New Level Loaded
-        //    if (Player == null)
-        //    {
-        //        Player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerMovement>();
-        //    }
-        //    if (CV == null)
-        //    {
-        //        CV = GameObject.FindGameObjectWithTag("UI").GetComponent<CanvasBehavior>();
-        //    }
-        //}
+        if (!isGameOver && SceneManager.GetActiveScene().name != "GameStart")
+        {
+            // New Level Loaded
+            if (Player == null)
+            {
+                Player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerMovement>();
+            }
+            // Get appropriate game mode UI and player references
+            if (currCharacter == "Host" && PlayerAwareness == null)
+            {
+                PlayerAwareness = GameObject.FindGameObjectWithTag("awarenessUI").GetComponent<Slider>();
+                updateAwarenessLevel(0.0f);
+            }
+            //if (CV == null)
+            //{
+            //    CV = GameObject.FindGameObjectWithTag("UI").GetComponent<CanvasBehavior>();
+            //}
+        }
         //else
         //{
         //    // Restart game
@@ -79,6 +91,21 @@ public class GameManager : MonoBehaviour
         //        isGameOver = false;
         //    }
         //}
+
+        // Get input for player movement
+        float xMove = 0;
+        float yMove = 0;
+
+        if ((yMove = Input.GetAxis("Vertical")) != 0)
+        {
+          //  Debug.Log("y movement: " + Input.GetAxis("Vertical"));
+            Player.movePlayer(0, yMove);
+        }
+        if ((xMove = Input.GetAxis("Horizontal")) != 0) { 
+           // Debug.Log("x movement: " + Input.GetAxis("Horizontal"));
+            Player.movePlayer(xMove, 0);
+
+        }
     }
 
     private void FixedUpdate()
@@ -114,13 +141,14 @@ public class GameManager : MonoBehaviour
     // string playerCharacter: identifier for game mode between host, staff, and guest
     public void loadNextLevel(string playerCharacter)
     {
+        currCharacter = playerCharacter;
 
         Debug.Log("loading next level for: " + playerCharacter);
 
         // If current scene is game start, get chosen character and start corresponding first level
         if (SceneManager.GetActiveScene().name == "GameStart")
         {
-            SceneManager.LoadScene(playerCharacter + "_Level" + 1);
+            SceneManager.LoadScene(currCharacter + "_Level" + 1);
         }
         // If not game start screen, load next level for current character
         else
@@ -128,7 +156,7 @@ public class GameManager : MonoBehaviour
             // Get current scene name
             string nextLevel = SceneManager.GetActiveScene().name;
             // Locate current level number
-            char currLevel = nextLevel[playerCharacter.Length + 6]; // add length of "_Level" to the length of the current player
+            char currLevel = nextLevel[currCharacter.Length + 6]; // add length of "_Level" to the length of the current player
             // Cast level number to integer
             int lev = (int)char.GetNumericValue(currLevel) + 1;
 
@@ -149,7 +177,7 @@ public class GameManager : MonoBehaviour
             //else
             //{
                 // Build string for next level
-                nextLevel = playerCharacter + "_" + lev.ToString();
+                nextLevel = currCharacter + "_" + lev.ToString();
             //}
 
             // Load level
@@ -170,6 +198,11 @@ public class GameManager : MonoBehaviour
                 guestButton.interactable = guestIsUnlocked;
                 break;
         }
+    }
+
+    public void updateAwarenessLevel(float currAwareness)
+    {
+        PlayerAwareness.value = currAwareness;
     }
 
 }
