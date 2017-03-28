@@ -2,12 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 
 public class GameManager : MonoBehaviour
 {
 
     public static GameManager GM;
+
+    // Second and Third game modes are locked at game start
+    public Button staffButton; 
+    private bool staffIsUnlocked = false;
+    public Button guestButton;
+    private bool guestIsUnlocked = false;
+    
+
     private string currCharacter;
     //public PlayerMovement Player;
     //public CanvasBehavior CV;
@@ -19,6 +28,14 @@ public class GameManager : MonoBehaviour
         if (GM == null)
         {
             GM = this;
+            if (!staffIsUnlocked)
+            {
+                staffButton.interactable = false;
+            }
+            if (!guestIsUnlocked)
+            {
+                guestButton.interactable = false;
+            }
         }
         else if (GM != this)
         {
@@ -137,6 +154,21 @@ public class GameManager : MonoBehaviour
 
             // Load level
             SceneManager.LoadScene(nextLevel);
+        }
+    }
+
+    public void toggleGameModeEnabled(int mode) 
+    {
+        switch (mode)
+        {
+            case 1:
+                staffIsUnlocked = !staffIsUnlocked;
+                staffButton.interactable = staffIsUnlocked;
+                break;
+            case 2:
+                guestIsUnlocked = !guestIsUnlocked;
+                guestButton.interactable = guestIsUnlocked;
+                break;
         }
     }
 
