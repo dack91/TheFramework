@@ -11,6 +11,7 @@ public class PlayerMovement : MonoBehaviour
     public float awarenessInterval = 3f;
     private float awarenessLevel;
 
+    private int currAwarenessZone = 0;
 
     // Use this for initialization
     void Start()
@@ -23,12 +24,11 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //Debug.Log("awareness: " + awarenessLevel);
+        Debug.Log("currZone: " + currAwarenessZone);
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        Debug.Log("blarg coll blarg");
     }
 
     private void OnTriggerEnter(Collider other)
@@ -38,17 +38,20 @@ public class PlayerMovement : MonoBehaviour
         if (other.tag == "safe")
         {
             //   Debug.Log("safe");
-            StartCoroutine(influenceAwareness(awarenessLevel, 0.0f, awarenessInterval));
+            currAwarenessZone = 0;
+            StartCoroutine(influenceAwareness(awarenessLevel, 0.0f, awarenessInterval, 0));
         }
         else if (other.tag == "warning")
         {
             //    Debug.Log("warning");
-            StartCoroutine(influenceAwareness(awarenessLevel, 0.5f, awarenessInterval));
+            currAwarenessZone = 1;
+            StartCoroutine(influenceAwareness(awarenessLevel, 0.5f, awarenessInterval, 1));
         }
         else if (other.tag == "alarm")
         {
             //  Debug.Log("alarm");
-            StartCoroutine(influenceAwareness(awarenessLevel, 1.0f, awarenessInterval));
+            currAwarenessZone = 2;
+            StartCoroutine(influenceAwareness(awarenessLevel, 1.0f, awarenessInterval, 2));
         }
     }
 
@@ -70,7 +73,7 @@ public class PlayerMovement : MonoBehaviour
     }
 
     //TODO: lock awareness value and properly handle transitions between competing coroutines
-    private IEnumerator influenceAwareness(float start, float goal, float duration)
+    private IEnumerator influenceAwareness(float start, float goal, float duration, int zone)
     {
         // Note coroutine start time
         float startTime = Time.time;
@@ -78,6 +81,11 @@ public class PlayerMovement : MonoBehaviour
         // for the duration of the transition
         while (Time.time < startTime + duration)
         {
+            if (currAwarenessZone != zone)
+            {
+                Debug.Log("quitting: " + zone);
+                yield break;
+            }
             // Smoothly transition between float values over time
             awarenessLevel = Mathf.Lerp(start, goal, (Time.time - startTime) / duration);
             // Visually update awareness slider bar as value transitions
