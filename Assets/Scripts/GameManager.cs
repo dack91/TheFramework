@@ -144,45 +144,42 @@ public class GameManager : MonoBehaviour
         currCharacter = playerCharacter;
 
         Debug.Log("loading next level for: " + playerCharacter);
+        SceneManager.LoadScene(currCharacter + "_Level" + 1);
+    }
+    // Load Level
+    public void loadNextLevel()
+    {
+        // Get current scene name
+        string nextLevel = SceneManager.GetActiveScene().name;
+        // Locate current level number
+        char currLevel = nextLevel[currCharacter.Length + 6]; // add length of "_Level" to the length of the current player
+        // Cast level number to integer
+        int lev = (int)char.GetNumericValue(currLevel) + 1;
 
-        // If current scene is game start, get chosen character and start corresponding first level
-        if (SceneManager.GetActiveScene().name == "GameStart")
-        {
-            SceneManager.LoadScene(currCharacter + "_Level" + 1);
-        }
-        // If not game start screen, load next level for current character
-        else
-        {
-            // Get current scene name
-            string nextLevel = SceneManager.GetActiveScene().name;
-            // Locate current level number
-            char currLevel = nextLevel[currCharacter.Length + 6]; // add length of "_Level" to the length of the current player
-            // Cast level number to integer
-            int lev = (int)char.GetNumericValue(currLevel) + 1;
+        // If last level, load game over scene
+        //if (lev > maxLevels)
+        //{
+        //    nextLevel = "GameOver";
+        //    isGameOver = true;
 
-            // If last level, load game over scene
-            //if (lev > maxLevels)
-            //{
-            //    nextLevel = "GameOver";
-            //    isGameOver = true;
+        //    // Destroy in game UI when moving to Game Over screen
+        //    GameObject canv = GameObject.FindGameObjectWithTag("UI");
+        //    if (canv != null)
+        //    {
+        //        Destroy(canv);
+        //    }
+        //}
+        // Load next level
+        //else
+        //{
+        // Build string for next level
+        nextLevel = currCharacter + "_Level" + lev.ToString();
+        //}
 
-            //    // Destroy in game UI when moving to Game Over screen
-            //    GameObject canv = GameObject.FindGameObjectWithTag("UI");
-            //    if (canv != null)
-            //    {
-            //        Destroy(canv);
-            //    }
-            //}
-            // Load next level
-            //else
-            //{
-                // Build string for next level
-                nextLevel = currCharacter + "_" + lev.ToString();
-            //}
+        Debug.Log("loading: " + nextLevel); 
 
-            // Load level
-            SceneManager.LoadScene(nextLevel);
-        }
+        // Load level
+        SceneManager.LoadScene(nextLevel);
     }
 
     public void toggleGameModeEnabled(int mode) 

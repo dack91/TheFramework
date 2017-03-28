@@ -6,11 +6,15 @@ public class PlayerMovement : MonoBehaviour
 {
 
     private GameManager GM;
+    private CharacterController controller;
 
     public float force;
     public float awarenessInterval = 3f;
     private float awarenessLevel;
 
+    // Current zone used to monitor and smoothly 
+    // transition between zones when changes
+    // made before animation finishes
     private int currAwarenessZone = 0;
 
     // Use this for initialization
@@ -19,12 +23,13 @@ public class PlayerMovement : MonoBehaviour
         GM = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
         awarenessLevel = 0.0f;
         GM.updateAwarenessLevel(awarenessLevel);
+        controller = GetComponent<CharacterController>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        Debug.Log("currZone: " + currAwarenessZone);
+      //  Debug.Log("currZone: " + currAwarenessZone);
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -53,6 +58,10 @@ public class PlayerMovement : MonoBehaviour
             currAwarenessZone = 2;
             StartCoroutine(influenceAwareness(awarenessLevel, 1.0f, awarenessInterval, 2));
         }
+        else if (other.tag == "Finish")
+        {
+            GM.loadNextLevel();
+        }
     }
 
     private void OnTriggerExit(Collider other)
@@ -64,15 +73,12 @@ public class PlayerMovement : MonoBehaviour
     // 2 directional player movement
     public void movePlayer(float dirX, float dirY)
     {
-        dirX *= Time.deltaTime;
-        dirY *= Time.deltaTime;
-        float moveX = dirX * force;
-        float moveY = dirY * force;
+        Vector3 movement = new Vector3(dirX, dirY, 0.0f);
+        movement *= force;
 
-        transform.Translate(moveX, moveY, 0);
+        controller.Move(movement * Time.deltaTime);
     }
 
-    //TODO: lock awareness value and properly handle transitions between competing coroutines
     private IEnumerator influenceAwareness(float start, float goal, float duration, int zone)
     {
         // Note coroutine start time
@@ -81,9 +87,10 @@ public class PlayerMovement : MonoBehaviour
         // for the duration of the transition
         while (Time.time < startTime + duration)
         {
+            // If awareness zone has changed, halt animation
             if (currAwarenessZone != zone)
             {
-                Debug.Log("quitting: " + zone);
+                // Debug.Log("quitting: " + zone);
                 yield break;
             }
             // Smoothly transition between float values over time
