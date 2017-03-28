@@ -8,6 +8,9 @@ public class PlayerMovement : MonoBehaviour
     private GameManager GM;
     private CharacterController controller;
 
+    private Vector3 startLoc;
+    private bool isDead;
+
     public float force;
     public float awarenessInterval = 3f;
     private float awarenessLevel;
@@ -24,12 +27,19 @@ public class PlayerMovement : MonoBehaviour
         awarenessLevel = 0.0f;
         GM.updateAwarenessLevel(awarenessLevel);
         controller = GetComponent<CharacterController>();
+        startLoc = transform.position;
+        isDead = false;
     }
 
     // Update is called once per frame
     void Update()
     {
       //  Debug.Log("currZone: " + currAwarenessZone);
+      if (awarenessLevel >= 0.95f)
+        {
+            Debug.Log("player death");
+            resetPlayer();
+        }
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -79,6 +89,15 @@ public class PlayerMovement : MonoBehaviour
         controller.Move(movement * Time.deltaTime);
     }
 
+    // Reset player to level start after death
+    public void resetPlayer()
+    {
+        isDead = true;
+        transform.position = startLoc;
+        awarenessLevel = 0.0f;
+        GM.updateAwarenessLevel(awarenessLevel);
+    }
+
     private IEnumerator influenceAwareness(float start, float goal, float duration, int zone)
     {
         // Note coroutine start time
@@ -91,6 +110,12 @@ public class PlayerMovement : MonoBehaviour
             if (currAwarenessZone != zone)
             {
                 // Debug.Log("quitting: " + zone);
+                yield break;
+            }
+            // If the player died, reset animation
+            else if (isDead)
+            {
+                isDead = false;
                 yield break;
             }
             // Smoothly transition between float values over time
