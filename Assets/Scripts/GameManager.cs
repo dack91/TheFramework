@@ -202,7 +202,10 @@ public class GameManager : MonoBehaviour
 
     public void updateAwarenessLevel(float currAwareness)
     {
-        PlayerAwareness.value = currAwareness;
+        if (PlayerAwareness != null)
+        {
+            PlayerAwareness.value = currAwareness;
+        }
     }
 
 }
