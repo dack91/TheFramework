@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviour
     //public CanvasBehavior CV;
     public int [] maxLevels;
     private bool isGameOver;
+    private int lev;
 
     private void Awake()
     {
@@ -71,6 +72,10 @@ public class GameManager : MonoBehaviour
             {
                 PlayerAwareness = GameObject.FindGameObjectWithTag("awarenessUI").GetComponent<Slider>();
                 updateAwarenessLevel(0.0f);
+
+                // Send player current level 
+                // to set awareness modifier
+                Player.setLevelMod(lev);
             }
             // Get input for player movement
             float xMove = 0;
@@ -128,8 +133,9 @@ public class GameManager : MonoBehaviour
 
         currCharacter = playerCharacter;
 
+        lev = 1;    // start level 1
         Debug.Log("loading next level for: " + playerCharacter);
-        SceneManager.LoadScene(currCharacter + "_Level" + 1);
+        SceneManager.LoadScene(currCharacter + "_Level" + lev);
     }
     // Load Level
     public void loadNextLevel()
@@ -139,7 +145,7 @@ public class GameManager : MonoBehaviour
         // Locate current level number
         char currLevel = nextLevel[currCharacter.Length + 6]; // add length of "_Level" to the length of the current player
         // Cast level number to integer
-        int lev = (int)char.GetNumericValue(currLevel) + 1;
+        lev = (int)char.GetNumericValue(currLevel) + 1;
 
         //If last level, load game over scene
         if (lev > maxLevels[currGameMode])

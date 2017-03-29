@@ -42,10 +42,10 @@ public class PlayerMovement : MonoBehaviour
 
         // Location and level modifiers
         // for zone awareness
-        alarmMod = 0.5f;
-        warningMod = 1.5f;
-        safeMod = 2.0f;
-        levelMod = 1.0f;
+        alarmMod = 12f;
+        warningMod = 4f;
+        safeMod = 2f;
+       // levelMod = 0.1f;   
     }
 
     // Update is called once per frame
@@ -61,6 +61,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
+        Debug.Log("lev mod: " + levelMod);
         other.gameObject.GetComponent<Renderer>().enabled = true;
         // Based on current security zone, update player awareness
         if (other.tag == "safe")
@@ -135,5 +136,10 @@ public class PlayerMovement : MonoBehaviour
             // Visually update awareness slider bar as value transitions
             GM.updateAwarenessLevel(awarenessLevel);
         }
+    }
+
+    public void setLevelMod(int mod)
+    {
+        levelMod = (float) mod * 0.2f;
     }
 }
