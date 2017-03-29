@@ -9,6 +9,8 @@ public class PlayerMovement : MonoBehaviour
     // Character controller reference
     private CharacterController controller;
 
+    public GameObject puzzle;
+
     // Player start location
     private Vector3 startLoc;
 
@@ -71,7 +73,7 @@ public class PlayerMovement : MonoBehaviour
             // if dead, reset level
             resetPlayer();
         }
-        else if (awarenessLevel >= 0.9f)
+        else if (awarenessLevel >= 0.9f && !isPaused)
         {
             //Debug.Log("threat high, minigame puzzle save init");
             isPaused = true;
@@ -176,32 +178,51 @@ public class PlayerMovement : MonoBehaviour
     }
     public void threatResolution(int index)
     {
-        switch(index)
+
+        switch (index)
         {
             // Admission, lose life reset
             case 0:
-                GM.endHostSave();
-                isPaused = false;
                 GM.decrementHostItem(GM.HOST_LIVES_INDEX);
+                isPaused = false;
+                GM.endHostSave();
                 resetPlayer();
                 break;
             // Persuasion, lose persuade, start minipuzzle
             case 1:
-                awarenessLevel = 0.0f;
-                GM.updateAwarenessLevel(awarenessLevel);
-                GM.endHostSave();
+                Debug.Log("persuade chosen");
                 GM.decrementHostItem(GM.HOST_PERSUADES_INDEX);
-                isPaused = false;
+                GM.endHostSave();
+                //Debug.Log("starting minigame");
+
+                GameObject puzzleClone = Instantiate(puzzle);
+
+                // isSolvingPuzzle = true;
+                // threatSaveSuccessful();
                 break;
             // Bribe, lose bribe
             case 2:
-                awarenessLevel = 0.0f;
-                GM.updateAwarenessLevel(awarenessLevel);
-                GM.endHostSave();
+                threatSaveSuccessful();
                 GM.decrementHostItem(GM.HOST_BRIBES_INDEX);
-                isPaused = false;
                 break;
         }
+    }
+
+    public void threatSaveSuccessful()
+    {
+        awarenessLevel = 0.0f;
+        GM.updateAwarenessLevel(awarenessLevel);
+        GM.endHostSave();
+        isPaused = false;
+    }
+
+    // Called when persuasion sequencing puzzle fails
+    public void threatSaveFailed()
+    {
+        GM.decrementHostItem(GM.HOST_LIVES_INDEX);
+        GM.decrementHostItem(GM.HOST_LIVES_INDEX);
+        resetPlayer();
+        isPaused = false;
     }
 
     // Set the threat time step modifier based on current level
