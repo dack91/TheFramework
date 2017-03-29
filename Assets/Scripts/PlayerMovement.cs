@@ -11,14 +11,24 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 startLoc;
     private bool isDead;
 
-    public float force;
-    public float awarenessInterval = 1f;
+    // Monitor and apply appropriate 
+    // modifiers to awareness level
+    // based on current location
+    private float alarmMod;
+    private float warningMod;
+    private float safeMod;
+    private float levelMod;
+
     private float awarenessLevel;
 
     // Current zone used to monitor and smoothly 
     // transition between zones when changes
     // made before animation finishes
     private int currAwarenessZone = 0;
+
+    // Movement force applied on input
+    public float force;
+
 
     // Use this for initialization
     void Start()
@@ -29,44 +39,50 @@ public class PlayerMovement : MonoBehaviour
         controller = GetComponent<CharacterController>();
         startLoc = transform.position;
         isDead = false;
+
+        // Location and level modifiers
+        // for zone awareness
+        alarmMod = 0.5f;
+        warningMod = 1.5f;
+        safeMod = 2.0f;
+        levelMod = 1.0f;
     }
 
     // Update is called once per frame
     void Update()
     {
-      //  Debug.Log("currZone: " + currAwarenessZone);
-      if (awarenessLevel >= 0.95f)
+        //  Debug.Log("currZone: " + currAwarenessZone);
+        if (awarenessLevel >= 0.95f)
         {
             Debug.Log("player death");
             resetPlayer();
         }
     }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-    }
-
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerStay(Collider other)
     {
         other.gameObject.GetComponent<Renderer>().enabled = true;
         // Based on current security zone, update player awareness
         if (other.tag == "safe")
         {
-            //   Debug.Log("safe");
-            currAwarenessZone = 0;  
-            StartCoroutine(influenceAwareness(awarenessLevel, 0.0f, awarenessInterval * 2f, 0));
+            //Debug.Log("safe");
+            currAwarenessZone = 0;
+            influenceAwareness(awarenessLevel, 
+                0.0f, safeMod * levelMod, 0);
         }
         else if (other.tag == "warning")
         {
-            //    Debug.Log("warning");
+            //Debug.Log("warning");
             currAwarenessZone = 1;
-            StartCoroutine(influenceAwareness(awarenessLevel, 0.5f, awarenessInterval * 1.5f, 1));
+            influenceAwareness(awarenessLevel, 
+                1.0f, warningMod * levelMod, 1);
         }
         else if (other.tag == "alarm")
         {
-            //  Debug.Log("alarm");
+            //Debug.Log("alarm");
             currAwarenessZone = 2;
-            StartCoroutine(influenceAwareness(awarenessLevel, 1.0f, awarenessInterval, 2));
+            influenceAwareness(awarenessLevel, 
+                1.0f, alarmMod * levelMod, 2);
         }
         else if (other.tag == "Finish")
         {
@@ -77,7 +93,6 @@ public class PlayerMovement : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         other.gameObject.GetComponent<Renderer>().enabled = false;
-
     }
 
     // 2 directional player movement
@@ -98,31 +113,27 @@ public class PlayerMovement : MonoBehaviour
         GM.updateAwarenessLevel(awarenessLevel);
     }
 
-    private IEnumerator influenceAwareness(float start, float goal, float duration, int zone)
+    private void influenceAwareness(float start, float goal, float duration, int zone)
     {
         // Note coroutine start time
         float startTime = Time.time;
 
-        // for the duration of the transition
-        while (Time.time < startTime + duration)
+        // If awareness zone has changed, halt animation
+        if (currAwarenessZone != zone)
         {
-            // If awareness zone has changed, halt animation
-            if (currAwarenessZone != zone)
-            {
-                // Debug.Log("quitting: " + zone);
-                yield break;
-            }
-            // If the player died, reset animation
-            else if (isDead)
-            {
-                isDead = false;
-                yield break;
-            }
+            Debug.Log("quitting: " + zone);
+        }
+        // If the player died, reset animation
+        else if (isDead)
+        {
+            isDead = false;
+        }
+        else
+        {
             // Smoothly transition between float values over time
-            awarenessLevel = Mathf.Lerp(start, goal, (Time.time - startTime) / duration);
+            awarenessLevel = Mathf.Lerp(start, goal, Time.deltaTime * duration);
             // Visually update awareness slider bar as value transitions
             GM.updateAwarenessLevel(awarenessLevel);
-            yield return null;
         }
     }
 }
