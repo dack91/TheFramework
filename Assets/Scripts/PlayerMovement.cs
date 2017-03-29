@@ -4,128 +4,156 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-
+    // Game manager reference
     private GameManager GM;
+    // Character controller reference
     private CharacterController controller;
 
+    // Player start location
     private Vector3 startLoc;
+
+    // Player game states
     private bool isDead;
+    private bool isPaused;
+    private bool isSolvingPuzzle;
 
     // Monitor and apply appropriate 
     // modifiers to awareness level
     // based on current location
+    // and current level
     private float alarmMod;
     private float warningMod;
     private float safeMod;
     private float levelMod;
 
+    // Current threat level
     private float awarenessLevel;
-
-    // Current zone used to monitor and smoothly 
-    // transition between zones when changes
-    // made before animation finishes
-    private int currAwarenessZone = 0;
 
     // Movement force applied on input
     public float force;
 
-
     // Use this for initialization
     void Start()
     {
+        // Get Game Manager reference
         GM = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
+        // Set current threat level
         awarenessLevel = 0.0f;
         GM.updateAwarenessLevel(awarenessLevel);
+
+        // Get Player controller reference
         controller = GetComponent<CharacterController>();
+
+        // Store player start location
         startLoc = transform.position;
+
+        // Initialize player game states
         isDead = false;
+        isPaused = false;
+        isSolvingPuzzle = false;
 
         // Location and level modifiers
         // for zone awareness
         alarmMod = 12f;
         warningMod = 4f;
         safeMod = 2f;
-       // levelMod = 0.1f;   
     }
 
     // Update is called once per frame
     void Update()
     {
         //  Debug.Log("currZone: " + currAwarenessZone);
+
+        // Check if threat level results in player death
         if (awarenessLevel >= 0.95f)
         {
             Debug.Log("player death");
+            // if dead, reset level
             resetPlayer();
         }
     }
 
+    // Called once per frame when player overlaps with one or more trigger colliders
     private void OnTriggerStay(Collider other)
     {
-        Debug.Log("lev mod: " + levelMod);
+        // Show visualization of current threat zone
         other.gameObject.GetComponent<Renderer>().enabled = true;
+       
         // Based on current security zone, update player awareness
         if (other.tag == "safe")
         {
             //Debug.Log("safe");
-            currAwarenessZone = 0;
+            // Update awareness UI slider
             influenceAwareness(awarenessLevel, 
-                0.0f, safeMod * levelMod, 0);
+                0.0f, safeMod * levelMod);
         }
         else if (other.tag == "warning")
         {
             //Debug.Log("warning");
-            currAwarenessZone = 1;
+            // Update awareness UI slider
             influenceAwareness(awarenessLevel, 
-                1.0f, warningMod * levelMod, 1);
+                1.0f, warningMod * levelMod);
         }
         else if (other.tag == "alarm")
         {
             //Debug.Log("alarm");
-            currAwarenessZone = 2;
+            // Update awareness UI slider
             influenceAwareness(awarenessLevel, 
-                1.0f, alarmMod * levelMod, 2);
+                1.0f, alarmMod * levelMod);
         }
         else if (other.tag == "Finish")
         {
+            // Level goal reached, 
+            // progress through game
             GM.loadNextLevel();
         }
     }
 
+    // Called when player exits trigger collider
     private void OnTriggerExit(Collider other)
     {
+        // Hide visualization of zone threat level
         other.gameObject.GetComponent<Renderer>().enabled = false;
     }
 
     // 2 directional player movement
     public void movePlayer(float dirX, float dirY)
     {
+        // Input axis received from GameManager
         Vector3 movement = new Vector3(dirX, dirY, 0.0f);
+        // Apply force in all directions with input
         movement *= force;
 
+        // Move player over time
         controller.Move(movement * Time.deltaTime);
     }
 
     // Reset player to level start after death
     public void resetPlayer()
     {
+        // Set player state
         isDead = true;
+
+        // Move player to level start
         transform.position = startLoc;
+
+        // Reset threat level
         awarenessLevel = 0.0f;
         GM.updateAwarenessLevel(awarenessLevel);
     }
 
-    private void influenceAwareness(float start, float goal, float duration, int zone)
+    // Update UI Slider visualizing awareness threat level
+    // Parameters:
+    // float start: initial awareness level at function call
+    // float goal: end awareness level at lerp completion
+    // float duration: time step for lerp
+    private void influenceAwareness(float start, float goal, float duration)
     {
         // Note coroutine start time
         float startTime = Time.time;
 
-        // If awareness zone has changed, halt animation
-        if (currAwarenessZone != zone)
-        {
-            Debug.Log("quitting: " + zone);
-        }
         // If the player died, reset animation
-        else if (isDead)
+        if (isDead)
         {
             isDead = false;
         }
@@ -138,6 +166,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    // Set the threat time step modifier based on current level
     public void setLevelMod(int mod)
     {
         levelMod = (float) mod * 0.2f;
