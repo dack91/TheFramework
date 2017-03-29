@@ -14,7 +14,7 @@ public class PlayerMovement : MonoBehaviour
 
     // Player game states
     private bool isDead;
-    private bool isPaused;
+    public bool isPaused;
     private bool isSolvingPuzzle;
 
     // Monitor and apply appropriate 
@@ -71,41 +71,50 @@ public class PlayerMovement : MonoBehaviour
             // if dead, reset level
             resetPlayer();
         }
+        else if (awarenessLevel >= 0.9f)
+        {
+            //Debug.Log("threat high, minigame puzzle save init");
+            isPaused = true;
+            GM.initHostSave();
+        }
     }
 
     // Called once per frame when player overlaps with one or more trigger colliders
     private void OnTriggerStay(Collider other)
     {
-        // Show visualization of current threat zone
-        other.gameObject.GetComponent<Renderer>().enabled = true;
-       
-        // Based on current security zone, update player awareness
-        if (other.tag == "safe")
+        if (!isPaused)
         {
-            //Debug.Log("safe");
-            // Update awareness UI slider
-            influenceAwareness(awarenessLevel, 
-                0.0f, safeMod * levelMod);
-        }
-        else if (other.tag == "warning")
-        {
-            //Debug.Log("warning");
-            // Update awareness UI slider
-            influenceAwareness(awarenessLevel, 
-                1.0f, warningMod * levelMod);
-        }
-        else if (other.tag == "alarm")
-        {
-            //Debug.Log("alarm");
-            // Update awareness UI slider
-            influenceAwareness(awarenessLevel, 
-                1.0f, alarmMod * levelMod);
-        }
-        else if (other.tag == "Finish")
-        {
-            // Level goal reached, 
-            // progress through game
-            GM.loadNextLevel();
+            // Show visualization of current threat zone
+            other.gameObject.GetComponent<Renderer>().enabled = true;
+
+            // Based on current security zone, update player awareness
+            if (other.tag == "safe")
+            {
+                //Debug.Log("safe");
+                // Update awareness UI slider
+                influenceAwareness(awarenessLevel,
+                    0.0f, safeMod * levelMod);
+            }
+            else if (other.tag == "warning")
+            {
+                //Debug.Log("warning");
+                // Update awareness UI slider
+                influenceAwareness(awarenessLevel,
+                    1.0f, warningMod * levelMod);
+            }
+            else if (other.tag == "alarm")
+            {
+                //Debug.Log("alarm");
+                // Update awareness UI slider
+                influenceAwareness(awarenessLevel,
+                    1.0f, alarmMod * levelMod);
+            }
+            else if (other.tag == "Finish")
+            {
+                // Level goal reached, 
+                // progress through game
+                GM.loadNextLevel();
+            }
         }
     }
 
@@ -157,7 +166,7 @@ public class PlayerMovement : MonoBehaviour
         {
             isDead = false;
         }
-        else
+        else if (!isPaused)
         {
             // Smoothly transition between float values over time
             awarenessLevel = Mathf.Lerp(start, goal, Time.deltaTime * duration);
@@ -166,9 +175,43 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+
+    public void threatBribe(bool success)
+    {
+        awarenessLevel = 0.0f;
+        GM.updateAwarenessLevel(awarenessLevel);
+        GM.endHostSave();
+        isPaused = false;
+    }
+    public void threatPersuassion(bool success)
+    {
+        awarenessLevel = 0.0f;
+        GM.updateAwarenessLevel(awarenessLevel);
+        GM.endHostSave();
+        isPaused = false;
+    }
+    public void threatAdmission()
+    {
+        GM.endHostSave();
+        isPaused = false;
+
+        // TODO Subtract life
+        resetPlayer();
+    }
+
     // Set the threat time step modifier based on current level
     public void setLevelMod(int mod)
     {
         levelMod = (float) mod * 0.2f;
+    }
+
+    // Get/Set player paused game state
+    public bool getIsPaused()
+    {
+        return isPaused;
+    }
+    public void setIsPaused(bool pause)
+    {
+        isPaused = pause;
     }
 }

@@ -22,8 +22,14 @@ public class GameManager : MonoBehaviour
     private string currCharacter;
     private int currGameMode;
     public PlayerMovement Player;
+
+    private Canvas HostCanvas;
     public Slider PlayerAwareness;
-    //public CanvasBehavior CV;
+    public Button hostSaveButton1;
+    public Button hostSaveButton2;
+    public Button hostSaveButton3;
+
+
     public int [] maxLevels;
     private bool isGameOver;
     private int lev;
@@ -68,28 +74,41 @@ public class GameManager : MonoBehaviour
                 Player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerMovement>();
             }
             // Get appropriate game mode UI and player references
-            if (currCharacter == "Host" && PlayerAwareness == null)
+            if (currCharacter == "Host" && HostCanvas == null)
             {
+                HostCanvas = GameObject.FindGameObjectWithTag("Host_HUD").GetComponent<Canvas>();
                 PlayerAwareness = GameObject.FindGameObjectWithTag("awarenessUI").GetComponent<Slider>();
+                // PlayerAwareness = HostCanvas.GetComponent<Slider>();
+                hostSaveButton1 = GameObject.FindGameObjectWithTag("HostSaveButton1").GetComponent<Button>();
+                hostSaveButton1.image.gameObject.SetActive(false);
+                hostSaveButton2 = GameObject.FindGameObjectWithTag("HostSaveButton2").GetComponent<Button>();
+                hostSaveButton2.image.gameObject.SetActive(false);
+                hostSaveButton3 = GameObject.FindGameObjectWithTag("HostSaveButton3").GetComponent<Button>();
+                hostSaveButton3.image.gameObject.SetActive(false);
                 updateAwarenessLevel(0.0f);
 
                 // Send player current level 
                 // to set awareness modifier
                 Player.setLevelMod(lev);
             }
-            // Get input for player movement
-            float xMove = 0;
-            float yMove = 0;
 
-            if ((yMove = Input.GetAxis("Vertical")) != 0)
+            if (!Player.getIsPaused())
             {
-              //  Debug.Log("y movement: " + Input.GetAxis("Vertical"));
-                Player.movePlayer(0, yMove);
-            }
-            if ((xMove = Input.GetAxis("Horizontal")) != 0) { 
-               // Debug.Log("x movement: " + Input.GetAxis("Horizontal"));
-                Player.movePlayer(xMove, 0);
+                // Get input for player movement
+                float xMove = 0;
+                float yMove = 0;
 
+                if ((yMove = Input.GetAxis("Vertical")) != 0)
+                {
+                    //  Debug.Log("y movement: " + Input.GetAxis("Vertical"));
+                    Player.movePlayer(0, yMove);
+                }
+                if ((xMove = Input.GetAxis("Horizontal")) != 0)
+                {
+                    // Debug.Log("x movement: " + Input.GetAxis("Horizontal"));
+                    Player.movePlayer(xMove, 0);
+
+                }
             }
         }
         else
@@ -213,4 +232,19 @@ public class GameManager : MonoBehaviour
         }
     }
 
+
+    public void initHostSave()
+    {
+        hostSaveButton1.image.gameObject.SetActive(true);
+        hostSaveButton2.image.gameObject.SetActive(true);
+        hostSaveButton3.image.gameObject.SetActive(true);
+
+    }
+    public void endHostSave()
+    {
+        hostSaveButton1.image.gameObject.SetActive(false);
+        hostSaveButton2.image.gameObject.SetActive(false);
+        hostSaveButton3.image.gameObject.SetActive(false);
+
+    }
 }
