@@ -174,29 +174,34 @@ public class PlayerMovement : MonoBehaviour
             GM.updateAwarenessLevel(awarenessLevel);
         }
     }
-
-
-    public void threatBribe(bool success)
+    public void threatResolution(int index)
     {
-        awarenessLevel = 0.0f;
-        GM.updateAwarenessLevel(awarenessLevel);
-        GM.endHostSave();
-        isPaused = false;
-    }
-    public void threatPersuassion(bool success)
-    {
-        awarenessLevel = 0.0f;
-        GM.updateAwarenessLevel(awarenessLevel);
-        GM.endHostSave();
-        isPaused = false;
-    }
-    public void threatAdmission()
-    {
-        GM.endHostSave();
-        isPaused = false;
-
-        // TODO Subtract life
-        resetPlayer();
+        switch(index)
+        {
+            // Admission, lose life reset
+            case 0:
+                GM.endHostSave();
+                isPaused = false;
+                GM.decrementHostItem(GM.HOST_LIVES_INDEX);
+                resetPlayer();
+                break;
+            // Persuasion, lose persuade, start minipuzzle
+            case 1:
+                awarenessLevel = 0.0f;
+                GM.updateAwarenessLevel(awarenessLevel);
+                GM.endHostSave();
+                GM.decrementHostItem(GM.HOST_PERSUADES_INDEX);
+                isPaused = false;
+                break;
+            // Bribe, lose bribe
+            case 2:
+                awarenessLevel = 0.0f;
+                GM.updateAwarenessLevel(awarenessLevel);
+                GM.endHostSave();
+                GM.decrementHostItem(GM.HOST_BRIBES_INDEX);
+                isPaused = false;
+                break;
+        }
     }
 
     // Set the threat time step modifier based on current level

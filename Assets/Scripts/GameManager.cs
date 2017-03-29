@@ -23,11 +23,21 @@ public class GameManager : MonoBehaviour
     private int currGameMode;
     public PlayerMovement Player;
 
+    // HOST Game Mode 
     private Canvas HostCanvas;
-    public Slider PlayerAwareness;
-    public Button hostSaveButton1;
-    public Button hostSaveButton2;
-    public Button hostSaveButton3;
+    private Slider PlayerAwareness;
+    private Button hostSaveButton1;
+    private Button hostSaveButton2;
+    private Button hostSaveButton3;
+    private Text hostLivesText;
+    private Text hostBribesText;
+    private Text hostPersuadesText;
+    private int hostLivesLeft = 9;
+    private int hostBribesLeft = 8;
+    private int hostPersuadesLeft = 10;
+    public int HOST_LIVES_INDEX = 0;
+    public int HOST_PERSUADES_INDEX = 1;
+    public int HOST_BRIBES_INDEX = 2;
 
 
     public int [] maxLevels;
@@ -79,12 +89,21 @@ public class GameManager : MonoBehaviour
                 HostCanvas = GameObject.FindGameObjectWithTag("Host_HUD").GetComponent<Canvas>();
                 PlayerAwareness = GameObject.FindGameObjectWithTag("awarenessUI").GetComponent<Slider>();
                 // PlayerAwareness = HostCanvas.GetComponent<Slider>();
+
                 hostSaveButton1 = GameObject.FindGameObjectWithTag("HostSaveButton1").GetComponent<Button>();
                 hostSaveButton1.image.gameObject.SetActive(false);
                 hostSaveButton2 = GameObject.FindGameObjectWithTag("HostSaveButton2").GetComponent<Button>();
                 hostSaveButton2.image.gameObject.SetActive(false);
                 hostSaveButton3 = GameObject.FindGameObjectWithTag("HostSaveButton3").GetComponent<Button>();
                 hostSaveButton3.image.gameObject.SetActive(false);
+
+                hostLivesText = GameObject.FindGameObjectWithTag("HostLivesText").GetComponent<Text>();
+                hostLivesText.text = hostLivesLeft.ToString();
+                hostPersuadesText = GameObject.FindGameObjectWithTag("HostPersText").GetComponent<Text>();
+                hostPersuadesText.text = hostPersuadesLeft.ToString();
+                hostBribesText = GameObject.FindGameObjectWithTag("HostBribeText").GetComponent<Text>();
+                hostBribesText.text = hostBribesLeft.ToString();
+
                 updateAwarenessLevel(0.0f);
 
                 // Send player current level 
@@ -232,7 +251,8 @@ public class GameManager : MonoBehaviour
         }
     }
 
-
+    // Initiate and deactivate buttons choices 
+    // on critical threat levels for host
     public void initHostSave()
     {
         hostSaveButton1.image.gameObject.SetActive(true);
@@ -246,5 +266,27 @@ public class GameManager : MonoBehaviour
         hostSaveButton2.image.gameObject.SetActive(false);
         hostSaveButton3.image.gameObject.SetActive(false);
 
+    }
+
+    public void decrementHostItem(int index)
+    {
+        switch(index)
+        {
+            // Admission, lives
+            case 0:
+                hostLivesLeft--;
+                hostLivesText.text = hostLivesLeft.ToString();
+                break;
+            // Persuasion
+            case 1:
+                hostPersuadesLeft--;
+                hostPersuadesText.text = hostPersuadesLeft.ToString();
+                break;
+            // Bribe
+            case 2:
+                hostBribesLeft--;
+                hostBribesText.text = hostBribesLeft.ToString();
+                break;
+        }
     }
 }
