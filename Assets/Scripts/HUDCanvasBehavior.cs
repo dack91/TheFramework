@@ -6,6 +6,9 @@ using UnityEngine.UI;
 
 public class HUDCanvasBehavior : MonoBehaviour
 {
+    // Game Manager reference
+    public static GameManager GM;
+
     // Canvas reference
     public static HUDCanvasBehavior CV;
 
@@ -30,6 +33,9 @@ public class HUDCanvasBehavior : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        // Game Manager 
+        GM = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
+
         // Initialize references and display store button, hiding home button
         homeButton = GameObject.FindGameObjectWithTag("HomeButton").GetComponent<Button>();
         storeButton = GameObject.FindGameObjectWithTag("StoreButton").GetComponent<Button>();
@@ -52,8 +58,17 @@ public class HUDCanvasBehavior : MonoBehaviour
     // When home button is pressed, load GameStart scene
     public void loadHome()
     {
+        // If threat level critical and player
+        // quits to home screen instead of resolving
+        // decrement life and return to home
+        if (GM.Player.getIsPaused())
+        {
+            GM.decrementHostItem(GM.HOST_LIVES_INDEX, 1);
+        }
+
+        // Load game start scene
         loadStoreButton();
-        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().restartGame();
+        GM.restartGame();
 
         // Debug.Log("load home");
     }

@@ -16,7 +16,7 @@ public class PlayerMovement : MonoBehaviour
 
     // Player game states
     private bool isDead;
-    public bool isPaused;
+    private bool isPaused;
     private bool hasTempImmunity;
     public int IMMUNITY_TIME;
 
