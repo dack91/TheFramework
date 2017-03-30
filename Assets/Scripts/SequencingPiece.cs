@@ -39,26 +39,22 @@ public class SequencingPiece : MonoBehaviour {
         {
             Debug.Log("CUBE " + index + " CLICKED");
 
-            // Select box and check sequencing
-            Puzzle.boxPicked(index);
-
             // Light up color for selected box
-            StartCoroutine(boxChecked());
+            // while mouse is clicked down
+            changeColor(color);
         }
+    }
+
+    private void OnMouseUp()
+    {
+        // Select box and check sequencing
+        Puzzle.boxPicked(index);
+        changeColor(baseColor);
     }
 
     // Change material color to input RGB value
     public void changeColor(Vector3 c)
     {
         rend.material.color = new Color(c.x, c.y, c.z);
-    }
-
-    // Light up material color and reset to neutral
-    // after 1 second
-    public IEnumerator boxChecked()
-    {
-        changeColor(color);
-        yield return new WaitForSeconds(1);
-        changeColor(baseColor);
     }
 }

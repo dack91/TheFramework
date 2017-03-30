@@ -20,14 +20,18 @@ public class GameManager : MonoBehaviour
     public Button guestButton;
     private bool guestIsUnlocked;
 
+    // Player game mode and character references
     private string currCharacter;
     private int currGameMode;
     public PlayerMovement Player;
 
+    // Player lives and timer for regeneration
     public static int MAX_LIVES = 9;
     public int LIFE_REGEN_RATE = 20;
     private bool lifeRegenIsActive = false;
 
+
+    // Daily prize regeneration
     public int PRIZE_REGEN_RATE = 80;
     private bool isPrizeAvailable = true;
 
@@ -47,10 +51,18 @@ public class GameManager : MonoBehaviour
     public int HOST_PERSUADES_INDEX = 1;
     public int HOST_BRIBES_INDEX = 2;
 
-
+    // Max game levels for each game mode
+    // host, staff, and guest respectively
     public int [] maxLevels;
+
+    // Game state
     private bool isGameOver;
     private int lev;
+
+    // Player levels for each game mode
+    private int curHostLevel;
+    private int curStaffLevel;
+    private int curGuestLevel;
 
     private void Awake()
     {
@@ -79,6 +91,11 @@ public class GameManager : MonoBehaviour
         guestIsUnlocked = false;
 
         initUI();
+
+        // Init player progress through levels
+        curHostLevel = 1;
+        curStaffLevel = 1;
+        curGuestLevel = 1;
     }
 
     // Update is called once per frame
@@ -141,14 +158,17 @@ public class GameManager : MonoBehaviour
             {
                 restartGame();
             }
-            if (CV == null)
-            {
-                CV = GameObject.FindGameObjectWithTag("UI").GetComponent<StartCanvasBehavior>();
-            }
-            if(HUD == null)
-            {
-                HUD = GameObject.FindGameObjectWithTag("UI_HUD").GetComponent<HUDCanvasBehavior>();
-            }
+            // TMP: shouldn't end up needing this
+            //if (CV == null)
+            //{
+            //    Debug.Log("CV reref");
+            //    CV = GameObject.FindGameObjectWithTag("UI").GetComponent<StartCanvasBehavior>();
+            //}
+            //if(HUD == null)
+            //{
+            //    Debug.Log("HUD reref");
+            //    HUD = GameObject.FindGameObjectWithTag("UI_HUD").GetComponent<HUDCanvasBehavior>();
+            //}
         }
     }
 
@@ -159,21 +179,23 @@ public class GameManager : MonoBehaviour
         isGameOver = false;
         CV.GetComponent<Canvas>().enabled = true;
 
-        //Debug.Log("staffB: " + staffIsUnlocked);
-        //Debug.Log("guestB: " + guestIsUnlocked);
-
         initUI();
     }
 
+    // Initialize navigation and resource UI 
+    // constant throughout all game modes
     public void initUI()
     {
+        // Scene navigation
         staffButton.interactable = staffIsUnlocked;
         guestButton.interactable = guestIsUnlocked;
 
+        // Player resources
         hostLivesText = GameObject.FindGameObjectWithTag("HostLivesText").GetComponent<Text>();
         hostPersuadesText = GameObject.FindGameObjectWithTag("HostPersText").GetComponent<Text>();
         hostBribesText = GameObject.FindGameObjectWithTag("HostBribeText").GetComponent<Text>();
 
+        // Display current resource values
         refreshHUDValues();
     }
 
@@ -187,9 +209,10 @@ public class GameManager : MonoBehaviour
     // string playerCharacter: identifier for game mode between host, staff, and guest
     public void loadNextLevel(string playerCharacter)
     {
+        // Send to store if no lives remaining
         if (hostLivesLeft <= 0)
         {
-            Debug.Log("no lives left, pay or wait");
+            //Debug.Log("no lives left, pay or wait");
             loadStore();
         }
         else
@@ -199,7 +222,23 @@ public class GameManager : MonoBehaviour
 
             currCharacter = playerCharacter;
 
-            lev = 1;    // start level 1
+            // Default, start level 1
+            lev = 1;
+
+            // Load current level for chosen game mode
+            switch(currCharacter)
+            {
+                case "Host":
+                    lev = curHostLevel;
+                    break;
+                case "Staff":
+                    lev = curStaffLevel;
+                    break;
+                case "Guest":
+                    lev = curGuestLevel;
+                    break;
+            }
+
             Debug.Log("loading next level for: " + playerCharacter);
             SceneManager.LoadScene(currCharacter + "_Level" + lev);
         }
@@ -214,8 +253,28 @@ public class GameManager : MonoBehaviour
         // Cast level number to integer
         lev = (int)char.GetNumericValue(currLevel) + 1;
 
+        // If new level in game mode exists
+        if (lev <= maxLevels[currGameMode])
+        {
+            // Save level progress for current game mode
+            switch (currCharacter)
+            {
+                case "Host":
+                    curHostLevel = lev;
+                    break;
+                case "Staff":
+                    curStaffLevel = lev;
+                    break;
+                case "Guest":
+                    curGuestLevel = lev;
+                    break;
+            }
+
+           // Build string for next level 
+           nextLevel = currCharacter + "_Level" + lev.ToString();
+        }
         //If last level, load game over scene
-        if (lev > maxLevels[currGameMode])
+        else
         {
             nextLevel = "GameOver";
             isGameOver = true;
@@ -226,13 +285,7 @@ public class GameManager : MonoBehaviour
                 unlockGameMode(currGameMode + 1);
             }
         }
-        // Load next level
-        else
-        {
-           // Build string for next level 
-           nextLevel = currCharacter + "_Level" + lev.ToString();
-        }
-
+        
         Debug.Log("loading: " + nextLevel); 
 
         // Load level
@@ -247,7 +300,7 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene("GameStore");
     }
 
-    // FOR DEBUG TO ACTIVATE GAME MODE
+    //TMP: FOR DEBUG TO ACTIVATE GAME MODE
     public void toggleGameModeEnabled(int mode) 
     {
         switch (mode)
