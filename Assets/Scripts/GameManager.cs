@@ -306,26 +306,34 @@ public class GameManager : MonoBehaviour
 
     }
 
-    public void decrementHostItem(int index)
+    // Adjust player resources
+    // int index: which resources is changed
+    // int amount: resource quantity changed
+    public void decrementHostItem(int index, int amount)
     {
         switch(index)
         {
-            // Admission, lives
+            // Lives
             case 0:
-                hostLivesLeft--;
+                hostLivesLeft -= amount;
                 // If game lost, return to home screen
                 if (hostLivesLeft <= 0)
                 {
                     restartGame();
                 }
+                // If buying lives, limit addition to max
+                if(hostLivesLeft > MAX_LIVES)
+                {
+                    hostLivesLeft = MAX_LIVES;
+                }
                 break;
             // Persuasion
             case 1:
-                hostPersuadesLeft--;
+                hostPersuadesLeft -= amount;
                 break;
             // Bribe
             case 2:
-                hostBribesLeft--;
+                hostBribesLeft -= amount;
                 break;
         }
         refreshHUDValues();

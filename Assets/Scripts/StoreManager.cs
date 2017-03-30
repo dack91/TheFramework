@@ -19,6 +19,7 @@ public class StoreManager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        // Check if daily prize has regenerated
 		if (GM.getIsPrizeAvailable())
         {
             prizeButton.interactable = GM.getIsPrizeAvailable();
@@ -31,23 +32,28 @@ public class StoreManager : MonoBehaviour {
         {
             // Buy Lives
             case 0:
+                GM.decrementHostItem(GM.HOST_LIVES_INDEX, -5);
                 break;
             // Buy Bribes
             case 1:
+                GM.decrementHostItem(GM.HOST_BRIBES_INDEX, -3);
                 break;
             // Watch for Lives
             case 2:
+                GM.decrementHostItem(GM.HOST_LIVES_INDEX, -2);
                 break;
             // Buy Persuasion
             case 3:
+                GM.decrementHostItem(GM.HOST_PERSUADES_INDEX, -5);
                 break;
               
         }
     }
 
+    // Collect prize and disable until regenerated
     public void collectDailyPrize()
     {
-        Debug.Log("collect prize, start 24h clock");
+        //Debug.Log("collect prize, start 24h clock");
         prizeButton.interactable = false;
         GM.collectPrize();
     }

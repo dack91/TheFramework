@@ -190,7 +190,7 @@ public class PlayerMovement : MonoBehaviour
         {
             // Admission, lose life reset
             case 0:
-                GM.decrementHostItem(GM.HOST_LIVES_INDEX);
+                GM.decrementHostItem(GM.HOST_LIVES_INDEX, 1);
                 isPaused = false;
                 GM.endHostSave();
                 resetPlayer();
@@ -198,7 +198,7 @@ public class PlayerMovement : MonoBehaviour
             // Persuasion, lose persuade, start minipuzzle
             case 1:
                 Debug.Log("persuade chosen");
-                GM.decrementHostItem(GM.HOST_PERSUADES_INDEX);
+                GM.decrementHostItem(GM.HOST_PERSUADES_INDEX, 1);
                 GM.endHostSave();
                 //Debug.Log("starting minigame");
 
@@ -210,7 +210,7 @@ public class PlayerMovement : MonoBehaviour
             // Bribe, lose bribe
             case 2:
                 threatSaveSuccessful();
-                GM.decrementHostItem(GM.HOST_BRIBES_INDEX);
+                GM.decrementHostItem(GM.HOST_BRIBES_INDEX, 1);
                 break;
         }
     }
@@ -241,8 +241,7 @@ public class PlayerMovement : MonoBehaviour
     // Called when persuasion sequencing puzzle fails
     public void threatSaveFailed()
     {
-        GM.decrementHostItem(GM.HOST_LIVES_INDEX);
-        GM.decrementHostItem(GM.HOST_LIVES_INDEX);
+        GM.decrementHostItem(GM.HOST_LIVES_INDEX, 2);
         resetPlayer();
         isPaused = false;
     }
