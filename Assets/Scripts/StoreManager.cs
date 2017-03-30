@@ -35,9 +35,4 @@ public class StoreManager : MonoBehaviour {
               
         }
     }
-
-    public void loadHome()
-    {
-        SceneManager.LoadScene("GameStart");
-    }
 }

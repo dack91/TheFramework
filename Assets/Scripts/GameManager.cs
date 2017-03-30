@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
 
     public static GameManager GM;
     public StartCanvasBehavior CV;
+    public HUDCanvasBehavior HUD;
 
 
     // Second and Third game modes are locked at game start
@@ -70,6 +71,7 @@ public class GameManager : MonoBehaviour
         Debug.Log("START");
         isGameOver = false;
         CV = GameObject.FindGameObjectWithTag("UI").GetComponent<StartCanvasBehavior>();
+        HUD = GameObject.FindGameObjectWithTag("UI_HUD").GetComponent<HUDCanvasBehavior>();
         staffIsUnlocked = false;
         guestIsUnlocked = false;
 
@@ -87,7 +89,9 @@ public class GameManager : MonoBehaviour
         }
 
         // Player is playing in one of three game modes
-        if (!isGameOver && SceneManager.GetActiveScene().name != "GameStart")
+        if (!isGameOver && 
+            SceneManager.GetActiveScene().name != "GameStart" && 
+            SceneManager.GetActiveScene().name != "GameStore")
         {
             // New Level Loaded
             if (Player == null)
@@ -103,7 +107,10 @@ public class GameManager : MonoBehaviour
             {
 
             }
-            else if (currCharacter == "Guest") ;
+            else if (currCharacter == "Guest")
+            {
+
+            }
 
             if (!Player.getIsPaused())
             {
@@ -135,6 +142,10 @@ public class GameManager : MonoBehaviour
             {
                 CV = GameObject.FindGameObjectWithTag("UI").GetComponent<StartCanvasBehavior>();
             }
+            if(HUD == null)
+            {
+                HUD = GameObject.FindGameObjectWithTag("UI_HUD").GetComponent<HUDCanvasBehavior>();
+            }
         }
     }
 
@@ -158,6 +169,10 @@ public class GameManager : MonoBehaviour
 
         hostLivesText = GameObject.FindGameObjectWithTag("HostLivesText").GetComponent<Text>();
         hostLivesText.text = hostLivesLeft.ToString();
+        hostPersuadesText = GameObject.FindGameObjectWithTag("HostPersText").GetComponent<Text>();
+        hostPersuadesText.text = hostPersuadesLeft.ToString();
+        hostBribesText = GameObject.FindGameObjectWithTag("HostBribeText").GetComponent<Text>();
+        hostBribesText.text = hostBribesLeft.ToString();
     }
 
     // Set player choice for game mode
@@ -176,6 +191,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
+            HUD.loadHomeButton();
             CV.GetComponent<Canvas>().enabled = false;
 
             currCharacter = playerCharacter;
@@ -218,6 +234,12 @@ public class GameManager : MonoBehaviour
 
         // Load level
         SceneManager.LoadScene(nextLevel);
+    }
+    public void loadStore()
+    {
+        CV.GetComponent<Canvas>().enabled = false;
+        HUD.loadHomeButton();
+        SceneManager.LoadScene("GameStore");
     }
 
     // FOR DEBUG TO ACTIVATE GAME MODE
@@ -324,12 +346,12 @@ public class GameManager : MonoBehaviour
         hostSaveButton3 = GameObject.FindGameObjectWithTag("HostSaveButton3").GetComponent<Button>();
         hostSaveButton3.image.gameObject.SetActive(false);
 
-        hostLivesText = GameObject.FindGameObjectsWithTag("HostLivesText")[1].GetComponent<Text>();
-        hostLivesText.text = hostLivesLeft.ToString();
-        hostPersuadesText = GameObject.FindGameObjectWithTag("HostPersText").GetComponent<Text>();
-        hostPersuadesText.text = hostPersuadesLeft.ToString();
-        hostBribesText = GameObject.FindGameObjectWithTag("HostBribeText").GetComponent<Text>();
-        hostBribesText.text = hostBribesLeft.ToString();
+        //hostLivesText = GameObject.FindGameObjectWithTag("HostLivesText").GetComponent<Text>();
+        //hostLivesText.text = hostLivesLeft.ToString();
+        //hostPersuadesText = GameObject.FindGameObjectWithTag("HostPersText").GetComponent<Text>();
+        //hostPersuadesText.text = hostPersuadesLeft.ToString();
+        //hostBribesText = GameObject.FindGameObjectWithTag("HostBribeText").GetComponent<Text>();
+        //hostBribesText.text = hostBribesLeft.ToString();
 
         updateAwarenessLevel(0.0f);
 

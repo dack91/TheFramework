@@ -117,12 +117,12 @@ public class PlayerMovement : MonoBehaviour
                     influenceAwareness(awarenessLevel,
                         1.0f, alarmMod * levelMod);
                 }
-                else if (other.tag == "Finish")
-                {
-                    // Level goal reached, 
-                    // progress through game
-                    GM.loadNextLevel();
-                }
+            }
+            if (other.tag == "Finish")
+            {
+                // Level goal reached, 
+                // progress through game
+                GM.loadNextLevel();
             }
         }
     }
