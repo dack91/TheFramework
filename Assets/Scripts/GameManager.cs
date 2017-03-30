@@ -24,9 +24,12 @@ public class GameManager : MonoBehaviour
     private int currGameMode;
     public PlayerMovement Player;
 
-    public static int MAX_LIVES = 2;
+    public static int MAX_LIVES = 9;
     public int LIFE_REGEN_RATE = 20;
     private bool lifeRegenIsActive = false;
+
+    public int PRIZE_REGEN_RATE = 80;
+    private bool isPrizeAvailable = true;
 
     // HOST Game Mode 
     private Canvas HostCanvas;
@@ -168,11 +171,10 @@ public class GameManager : MonoBehaviour
         guestButton.interactable = guestIsUnlocked;
 
         hostLivesText = GameObject.FindGameObjectWithTag("HostLivesText").GetComponent<Text>();
-        hostLivesText.text = hostLivesLeft.ToString();
         hostPersuadesText = GameObject.FindGameObjectWithTag("HostPersText").GetComponent<Text>();
-        hostPersuadesText.text = hostPersuadesLeft.ToString();
         hostBribesText = GameObject.FindGameObjectWithTag("HostBribeText").GetComponent<Text>();
-        hostBribesText.text = hostBribesLeft.ToString();
+
+        refreshHUDValues();
     }
 
     // Set player choice for game mode
@@ -311,26 +313,22 @@ public class GameManager : MonoBehaviour
             // Admission, lives
             case 0:
                 hostLivesLeft--;
-
                 // If game lost, return to home screen
                 if (hostLivesLeft <= 0)
                 {
                     restartGame();
                 }
-
-                hostLivesText.text = hostLivesLeft.ToString();
                 break;
             // Persuasion
             case 1:
                 hostPersuadesLeft--;
-                hostPersuadesText.text = hostPersuadesLeft.ToString();
                 break;
             // Bribe
             case 2:
                 hostBribesLeft--;
-                hostBribesText.text = hostBribesLeft.ToString();
                 break;
         }
+        refreshHUDValues();
     }
 
 
@@ -349,13 +347,6 @@ public class GameManager : MonoBehaviour
         hostSaveButton3 = GameObject.FindGameObjectWithTag("HostSaveButton3").GetComponent<Button>();
         hostSaveButton3.image.gameObject.SetActive(false);
 
-        //hostLivesText = GameObject.FindGameObjectWithTag("HostLivesText").GetComponent<Text>();
-        //hostLivesText.text = hostLivesLeft.ToString();
-        //hostPersuadesText = GameObject.FindGameObjectWithTag("HostPersText").GetComponent<Text>();
-        //hostPersuadesText.text = hostPersuadesLeft.ToString();
-        //hostBribesText = GameObject.FindGameObjectWithTag("HostBribeText").GetComponent<Text>();
-        //hostBribesText.text = hostBribesLeft.ToString();
-
         updateAwarenessLevel(0.0f);
 
         // Send player current level 
@@ -363,17 +354,49 @@ public class GameManager : MonoBehaviour
         Player.setLevelMod(lev);
     }
 
+    // Update text values to reflect current values
+    public void refreshHUDValues()
+    {
+        hostLivesText.text = hostLivesLeft.ToString();
+        hostPersuadesText.text = hostPersuadesLeft.ToString();
+        hostBribesText.text = hostBribesLeft.ToString();
+    }
+
+    // Timer for regenerating lives
     public IEnumerator regenLives()
     {
         while (hostLivesLeft < MAX_LIVES)
         {
             yield return new WaitForSeconds(LIFE_REGEN_RATE);
             hostLivesLeft++;
-            hostLivesText.text = hostLivesLeft.ToString();
+            refreshHUDValues();
             Debug.Log("regen lives: " + hostLivesLeft);
         }
         Debug.Log("regen DONE: " + hostLivesLeft);
         lifeRegenIsActive = false;
         yield return null;
     }
+
+    // Collect prize and initiate timer
+    // for prize regeneration
+    public void collectPrize()
+    {
+        hostBribesLeft++;
+        hostPersuadesLeft += 3;
+        refreshHUDValues();
+        StartCoroutine(regenPrize());
+    }
+    // Timer for prize regeneration
+    public IEnumerator regenPrize()
+    {
+        isPrizeAvailable = false;
+        yield return new WaitForSeconds(PRIZE_REGEN_RATE);
+        isPrizeAvailable = true;
+    }
+    // Getter for enabling prize button
+    public bool getIsPrizeAvailable()
+    {
+        return isPrizeAvailable;
+    }
+
 }
