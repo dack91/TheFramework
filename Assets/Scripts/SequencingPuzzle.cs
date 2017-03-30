@@ -18,7 +18,8 @@ public class SequencingPuzzle : MonoBehaviour {
     private bool hasFailed;
 
     //Sequence generated for puzzle
-    public int[] sequence;
+    public int PUZZLE_LENGTH = 5;
+    private int[] sequence;
     private int curSeqIndex = 0;
 
     // Use this for initialization
@@ -29,8 +30,10 @@ public class SequencingPuzzle : MonoBehaviour {
 
         Player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerMovement>();
 
-        //TODO: generate random sequence at set to sequence[] var
+        // Generate random color sequence
+        generateSequence();
 
+        // Visualize sequence for player
         StartCoroutine(showSequence());
 	}
 	
@@ -137,6 +140,20 @@ public class SequencingPuzzle : MonoBehaviour {
         // Enable mouse input for player
         // to repeat color sequence
         isActive = true;
+    }
+
+    // Generate a random sequence for puzzle
+    public void generateSequence()
+    {
+        // Declare length of sequence
+        sequence = new int[PUZZLE_LENGTH];
+
+        // For each color in puzzle, 
+        // generate random child box ID
+        for(int i = 0; i < PUZZLE_LENGTH; i++)
+        {
+            sequence[i] = Random.Range(0, boxes.Length - 1);
+        }
     }
 
     //getter
