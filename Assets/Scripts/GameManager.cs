@@ -118,11 +118,14 @@ public class GameManager : MonoBehaviour
             {
                 Player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerMovement>();
             }
+
             // Get appropriate game mode UI and player references
             if (currCharacter == "Host" && HostCanvas == null)
             {
+                // loads threat awareness UI
                 initHostGame();
             }
+            //TODO: UI for staff and Guest for prestiege etc.
             else if (currCharacter == "Staff")
             {
 
@@ -132,17 +135,21 @@ public class GameManager : MonoBehaviour
 
             }
 
+            // If game mode is active, 
+            // check for movement input
             if (!Player.getIsPaused())
             {
                 // Get input for player movement
                 float xMove = 0;
                 float yMove = 0;
 
+                // Move Vertical
                 if ((yMove = Input.GetAxis("Vertical")) != 0)
                 {
                     //  Debug.Log("y movement: " + Input.GetAxis("Vertical"));
                     Player.movePlayer(0, yMove);
                 }
+                // Move Horizontal
                 if ((xMove = Input.GetAxis("Horizontal")) != 0)
                 {
                     // Debug.Log("x movement: " + Input.GetAxis("Horizontal"));
@@ -153,22 +160,11 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            // Restart game
+            // Restart game if key pressed
             if (Input.GetKeyDown(KeyCode.R))
             {
                 restartGame();
             }
-            // TMP: shouldn't end up needing this
-            //if (CV == null)
-            //{
-            //    Debug.Log("CV reref");
-            //    CV = GameObject.FindGameObjectWithTag("UI").GetComponent<StartCanvasBehavior>();
-            //}
-            //if(HUD == null)
-            //{
-            //    Debug.Log("HUD reref");
-            //    HUD = GameObject.FindGameObjectWithTag("UI_HUD").GetComponent<HUDCanvasBehavior>();
-            //}
         }
     }
 
@@ -179,6 +175,7 @@ public class GameManager : MonoBehaviour
         isGameOver = false;
         CV.GetComponent<Canvas>().enabled = true;
 
+        // Init player UI with nav and resources
         initUI();
     }
 
@@ -200,6 +197,7 @@ public class GameManager : MonoBehaviour
     }
 
     // Set player choice for game mode
+    // Called from GameStart scene buttons
     public void setGameMode(int mode)
     {
         currGameMode = mode;
@@ -215,6 +213,7 @@ public class GameManager : MonoBehaviour
             //Debug.Log("no lives left, pay or wait");
             loadStore();
         }
+        // Otherwise start game mode
         else
         {
             HUD.loadHomeButton();
@@ -239,7 +238,7 @@ public class GameManager : MonoBehaviour
                     break;
             }
 
-            Debug.Log("loading next level for: " + playerCharacter);
+            //Debug.Log("loading next level for: " + playerCharacter);
             SceneManager.LoadScene(currCharacter + "_Level" + lev);
         }
     }
@@ -273,7 +272,7 @@ public class GameManager : MonoBehaviour
            // Build string for next level 
            nextLevel = currCharacter + "_Level" + lev.ToString();
         }
-        //If last level, load game over scene
+        // If last level, load game over scene
         else
         {
             nextLevel = "GameOver";
@@ -300,22 +299,7 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene("GameStore");
     }
 
-    //TMP: FOR DEBUG TO ACTIVATE GAME MODE
-    public void toggleGameModeEnabled(int mode) 
-    {
-        switch (mode)
-        {
-            case 1:
-                staffIsUnlocked = !staffIsUnlocked;
-                staffButton.interactable = staffIsUnlocked;
-                break;
-            case 2:
-                guestIsUnlocked = !guestIsUnlocked;
-                guestButton.interactable = guestIsUnlocked;
-                break;
-        }
-    }
-
+    // Refresh UI slider showing threat awareness
     public void updateAwarenessLevel(float currAwareness)
     {
         if (PlayerAwareness != null)
@@ -329,6 +313,8 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // Unlock new game mode on previous mode completion
+    // int mode: completed game mode ID
     public void unlockGameMode(int mode)
     {
         switch(mode)
@@ -340,23 +326,6 @@ public class GameManager : MonoBehaviour
                 guestIsUnlocked = true;
                 break;
         }
-    }
-
-    // Initiate and deactivate buttons choices 
-    // on critical threat levels for host
-    public void initHostSave()
-    {
-        hostSaveButton1.image.gameObject.SetActive(true);
-        hostSaveButton2.image.gameObject.SetActive(true);
-        hostSaveButton3.image.gameObject.SetActive(true);
-
-    }
-    public void endHostSave()
-    {
-        hostSaveButton1.image.gameObject.SetActive(false);
-        hostSaveButton2.image.gameObject.SetActive(false);
-        hostSaveButton3.image.gameObject.SetActive(false);
-
     }
 
     // Adjust player resources
@@ -392,19 +361,22 @@ public class GameManager : MonoBehaviour
         refreshHUDValues();
     }
 
-
     // Initialize UI and appropriate variables for 
     // playing game in host mode
     public void initHostGame()
     {
+        // Canvas and threat awareness slider references
         HostCanvas = GameObject.FindGameObjectWithTag("Host_HUD").GetComponent<Canvas>();
         PlayerAwareness = GameObject.FindGameObjectWithTag("awarenessUI").GetComponent<Slider>();
-        // PlayerAwareness = HostCanvas.GetComponent<Slider>();
 
+        // Reference and deactivate threat resolution buttons
+        // Bribe
         hostSaveButton1 = GameObject.FindGameObjectWithTag("HostSaveButton1").GetComponent<Button>();
         hostSaveButton1.image.gameObject.SetActive(false);
+        //Persuade
         hostSaveButton2 = GameObject.FindGameObjectWithTag("HostSaveButton2").GetComponent<Button>();
         hostSaveButton2.image.gameObject.SetActive(false);
+        // Reset
         hostSaveButton3 = GameObject.FindGameObjectWithTag("HostSaveButton3").GetComponent<Button>();
         hostSaveButton3.image.gameObject.SetActive(false);
 
@@ -426,14 +398,19 @@ public class GameManager : MonoBehaviour
     // Timer for regenerating lives
     public IEnumerator regenLives()
     {
+        // Refill one life per time of regeneration rate
         while (hostLivesLeft < MAX_LIVES)
         {
             yield return new WaitForSeconds(LIFE_REGEN_RATE);
             hostLivesLeft++;
+
+            // Display updated life value
             refreshHUDValues();
-            Debug.Log("regen lives: " + hostLivesLeft);
+            //Debug.Log("regen lives: " + hostLivesLeft);
         }
-        Debug.Log("regen DONE: " + hostLivesLeft);
+        //Debug.Log("regen DONE: " + hostLivesLeft);
+
+        // When max lives filled, stop regen
         lifeRegenIsActive = false;
         yield return null;
     }
@@ -442,11 +419,17 @@ public class GameManager : MonoBehaviour
     // for prize regeneration
     public void collectPrize()
     {
+        // Increase resources
         hostBribesLeft++;
         hostPersuadesLeft += 3;
+
+        // Refresh UI with values
         refreshHUDValues();
+
+        // Start timer until next prize
         StartCoroutine(regenPrize());
     }
+
     // Timer for prize regeneration
     public IEnumerator regenPrize()
     {
@@ -454,10 +437,48 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(PRIZE_REGEN_RATE);
         isPrizeAvailable = true;
     }
+
     // Getter for enabling prize button
     public bool getIsPrizeAvailable()
     {
         return isPrizeAvailable;
     }
 
+    // Activate and deactivate buttons choices 
+    // on critical threat levels for host
+    public void initHostSave()
+    {
+        // Bribe
+        hostSaveButton1.image.gameObject.SetActive(true);
+        // Persuade
+        hostSaveButton2.image.gameObject.SetActive(true);
+        // Reset
+        hostSaveButton3.image.gameObject.SetActive(true);
+
+    }
+    public void endHostSave()
+    {
+        // Bribe
+        hostSaveButton1.image.gameObject.SetActive(false);
+        // Persuade
+        hostSaveButton2.image.gameObject.SetActive(false);
+        // Reset
+        hostSaveButton3.image.gameObject.SetActive(false);
+    }
+
+    //TMP: FOR DEBUG TO ACTIVATE GAME MODE
+    public void toggleGameModeEnabled(int mode) 
+    {
+        switch (mode)
+        {
+            case 1:
+                staffIsUnlocked = !staffIsUnlocked;
+                staffButton.interactable = staffIsUnlocked;
+                break;
+            case 2:
+                guestIsUnlocked = !guestIsUnlocked;
+                guestButton.interactable = guestIsUnlocked;
+                break;
+        }
+    }
 }
