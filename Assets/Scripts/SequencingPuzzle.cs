@@ -121,13 +121,17 @@ public class SequencingPuzzle : MonoBehaviour {
     // At initialization, visually show player the sequence
     public IEnumerator showSequence()
     {
-        //Debug.Log("starting show sequence");
-        // Show each color in sequence
-        for(int i = 0; i < sequence.Length; i++) 
+        //TODO: figure out and fix why first render material color change doesn't take effect
+
+        // This yield call fixes bug stopping 
+        // first color sequence from flashing
+        yield return new WaitForSeconds(1);
+
+        for (int i = 0; i < sequence.Length; i++) 
         {
             // Select current box
             SequencingPiece curr = boxes[sequence[i]];
-            Debug.Log("show seq: " + sequence[i] + " -- " + curr.color.x + ", " + curr.color.y + ", " + curr.color.z);
+            Debug.Log("show seq: " + sequence[i]);// + " -- " + curr.color.x + ", " + curr.color.y + ", " + curr.color.z);
 
             // Light up current box, wait for 1 sec
             // then reset to neutral
@@ -137,9 +141,26 @@ public class SequencingPuzzle : MonoBehaviour {
             yield return new WaitForSeconds(0.5f);
         }
 
+        // Flash all colors to indicate sequence end
+        for (int i = 0; i < boxes.Length; i++)
+        {
+            SequencingPiece curr = boxes[i];
+            curr.GetComponent<Renderer>().material.color = new Color(curr.color.x, curr.color.y, curr.color.z);
+        }
+        yield return new WaitForSeconds(1);
+        // Turn off all colors
+        for (int i = 0; i < boxes.Length; i++)
+        {
+            SequencingPiece curr = boxes[i];
+            curr.GetComponent<Renderer>().material.color = new Color(curr.baseColor.x, curr.baseColor.y, curr.baseColor.z);
+        }
+
         // Enable mouse input for player
         // to repeat color sequence
         isActive = true;
+
+
+        Debug.Log("ACTIVE");
     }
 
     // Generate a random sequence for puzzle
