@@ -54,6 +54,8 @@ public class HUDCanvasBehavior : MonoBehaviour
     {
         loadStoreButton();
         GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().restartGame();
+
+        Debug.Log("load home");
         // SceneManager.LoadScene("GameStart");
     }
 }

@@ -8,7 +8,7 @@ using System.Linq;
 
 public class GameManager : MonoBehaviour
 {
-
+    // Game Manager and Canvas references
     public static GameManager GM;
     public StartCanvasBehavior CV;
     public HUDCanvasBehavior HUD;
@@ -24,7 +24,7 @@ public class GameManager : MonoBehaviour
     private int currGameMode;
     public PlayerMovement Player;
 
-    public static int MAX_LIVES = 9;
+    public static int MAX_LIVES = 2;
     public int LIFE_REGEN_RATE = 20;
     private bool lifeRegenIsActive = false;
 
@@ -185,9 +185,10 @@ public class GameManager : MonoBehaviour
     // string playerCharacter: identifier for game mode between host, staff, and guest
     public void loadNextLevel(string playerCharacter)
     {
-        if (playerCharacter == "Host" && hostLivesLeft <= 0)
+        if (hostLivesLeft <= 0)
         {
             Debug.Log("no lives left, pay or wait");
+            loadStore();
         }
         else
         {
@@ -235,6 +236,8 @@ public class GameManager : MonoBehaviour
         // Load level
         SceneManager.LoadScene(nextLevel);
     }
+
+    // Load game store scene
     public void loadStore()
     {
         CV.GetComponent<Canvas>().enabled = false;
