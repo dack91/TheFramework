@@ -17,7 +17,8 @@ public class PlayerMovement : MonoBehaviour
     // Player game states
     private bool isDead;
     public bool isPaused;
-    private bool isSolvingPuzzle;
+    private bool hasTempImmunity;
+    public int IMMUNITY_TIME;
 
     // Monitor and apply appropriate 
     // modifiers to awareness level
@@ -52,7 +53,7 @@ public class PlayerMovement : MonoBehaviour
         // Initialize player game states
         isDead = false;
         isPaused = false;
-        isSolvingPuzzle = false;
+        hasTempImmunity = false;
 
         // Location and level modifiers
         // for zone awareness
@@ -89,33 +90,39 @@ public class PlayerMovement : MonoBehaviour
             // Show visualization of current threat zone
             other.gameObject.GetComponent<Renderer>().enabled = true;
 
-            // Based on current security zone, update player awareness
-            if (other.tag == "safe")
+            // If threat saved and immunity activated,
+            // do not increase threat level temporarily
+            if (!hasTempImmunity)
             {
-                //Debug.Log("safe");
-                // Update awareness UI slider
-                influenceAwareness(awarenessLevel,
-                    0.0f, safeMod * levelMod);
-            }
-            else if (other.tag == "warning")
-            {
-                //Debug.Log("warning");
-                // Update awareness UI slider
-                influenceAwareness(awarenessLevel,
-                    1.0f, warningMod * levelMod);
-            }
-            else if (other.tag == "alarm")
-            {
-                //Debug.Log("alarm");
-                // Update awareness UI slider
-                influenceAwareness(awarenessLevel,
-                    1.0f, alarmMod * levelMod);
-            }
-            else if (other.tag == "Finish")
-            {
-                // Level goal reached, 
-                // progress through game
-                GM.loadNextLevel();
+
+                // Based on current security zone, update player awareness
+                if (other.tag == "safe")
+                {
+                    //Debug.Log("safe");
+                    // Update awareness UI slider
+                    influenceAwareness(awarenessLevel,
+                        0.0f, safeMod * levelMod);
+                }
+                else if (other.tag == "warning")
+                {
+                    //Debug.Log("warning");
+                    // Update awareness UI slider
+                    influenceAwareness(awarenessLevel,
+                        1.0f, warningMod * levelMod);
+                }
+                else if (other.tag == "alarm")
+                {
+                    //Debug.Log("alarm");
+                    // Update awareness UI slider
+                    influenceAwareness(awarenessLevel,
+                        1.0f, alarmMod * levelMod);
+                }
+                else if (other.tag == "Finish")
+                {
+                    // Level goal reached, 
+                    // progress through game
+                    GM.loadNextLevel();
+                }
             }
         }
     }
@@ -208,12 +215,27 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    // Called when bribe or persuasion succeeds
     public void threatSaveSuccessful()
     {
         awarenessLevel = 0.0f;
         GM.updateAwarenessLevel(awarenessLevel);
         GM.endHostSave();
         isPaused = false;
+        StartCoroutine(initTempImmunity());
+    }
+
+    // When threat successfully evaded, allow
+    // for short grace period to leave alarm area
+    public IEnumerator initTempImmunity()
+    {
+        Debug.Log("start grace period");
+        hasTempImmunity = true;
+        //TODO: visualization and sound for temp immunity
+        yield return new WaitForSeconds(IMMUNITY_TIME);
+        hasTempImmunity = false;
+        Debug.Log("end grace period");
+
     }
 
     // Called when persuasion sequencing puzzle fails
