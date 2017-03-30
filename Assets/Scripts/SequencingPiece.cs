@@ -34,10 +34,10 @@ public class SequencingPiece : MonoBehaviour {
     // When player clicks on boxs
     private void OnMouseDown()
     {
-        // If the puzzle allows input
-        if (Puzzle.getIsActive())
+        // If the puzzle allows input and failure not occurred 
+        if (Puzzle.getIsActive() && !Puzzle.getHasFailed())
         {
-            //Debug.Log("CUBE " + index + " CLICKED");
+            Debug.Log("CUBE " + index + " CLICKED");
 
             // Select box and check sequencing
             Puzzle.boxPicked(index);

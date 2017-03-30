@@ -23,6 +23,10 @@ public class GameManager : MonoBehaviour
     private int currGameMode;
     public PlayerMovement Player;
 
+    public static int MAX_LIVES = 9;
+    public static int LIFE_REGEN_RATE = 1;
+    private bool lifeRegenIsActive = false;
+
     // HOST Game Mode 
     private Canvas HostCanvas;
     private Slider PlayerAwareness;
@@ -32,7 +36,7 @@ public class GameManager : MonoBehaviour
     private Text hostLivesText;
     private Text hostBribesText;
     private Text hostPersuadesText;
-    private int hostLivesLeft = 9;
+    private int hostLivesLeft = MAX_LIVES;
     private int hostBribesLeft = 8;
     private int hostPersuadesLeft = 10;
     public int HOST_LIVES_INDEX = 0;
@@ -69,13 +73,20 @@ public class GameManager : MonoBehaviour
         staffIsUnlocked = false;
         guestIsUnlocked = false;
 
-        staffButton.interactable = staffIsUnlocked;
-        guestButton.interactable = guestIsUnlocked;
+        initUI();
     }
 
     // Update is called once per frame
     void Update()
     {
+        // Life regeneration over time
+        if (!lifeRegenIsActive && hostLivesLeft < MAX_LIVES)
+        {
+            lifeRegenIsActive = true;
+            StartCoroutine(regenLives());
+        }
+
+        // Player is playing in one of three game modes
         if (!isGameOver && SceneManager.GetActiveScene().name != "GameStart")
         {
             // New Level Loaded
@@ -86,30 +97,13 @@ public class GameManager : MonoBehaviour
             // Get appropriate game mode UI and player references
             if (currCharacter == "Host" && HostCanvas == null)
             {
-                HostCanvas = GameObject.FindGameObjectWithTag("Host_HUD").GetComponent<Canvas>();
-                PlayerAwareness = GameObject.FindGameObjectWithTag("awarenessUI").GetComponent<Slider>();
-                // PlayerAwareness = HostCanvas.GetComponent<Slider>();
-
-                hostSaveButton1 = GameObject.FindGameObjectWithTag("HostSaveButton1").GetComponent<Button>();
-                hostSaveButton1.image.gameObject.SetActive(false);
-                hostSaveButton2 = GameObject.FindGameObjectWithTag("HostSaveButton2").GetComponent<Button>();
-                hostSaveButton2.image.gameObject.SetActive(false);
-                hostSaveButton3 = GameObject.FindGameObjectWithTag("HostSaveButton3").GetComponent<Button>();
-                hostSaveButton3.image.gameObject.SetActive(false);
-
-                hostLivesText = GameObject.FindGameObjectWithTag("HostLivesText").GetComponent<Text>();
-                hostLivesText.text = hostLivesLeft.ToString();
-                hostPersuadesText = GameObject.FindGameObjectWithTag("HostPersText").GetComponent<Text>();
-                hostPersuadesText.text = hostPersuadesLeft.ToString();
-                hostBribesText = GameObject.FindGameObjectWithTag("HostBribeText").GetComponent<Text>();
-                hostBribesText.text = hostBribesLeft.ToString();
-
-                updateAwarenessLevel(0.0f);
-
-                // Send player current level 
-                // to set awareness modifier
-                Player.setLevelMod(lev);
+                initHostGame();
             }
+            else if (currCharacter == "Staff")
+            {
+
+            }
+            else if (currCharacter == "Guest") ;
 
             if (!Player.getIsPaused())
             {
@@ -135,26 +129,35 @@ public class GameManager : MonoBehaviour
             // Restart game
             if (Input.GetKeyDown(KeyCode.R))
             {
-                SceneManager.LoadScene("GameStart");
-                isGameOver = false;
-                CV.GetComponent<Canvas>().enabled = true;
-
-                //Debug.Log("staffB: " + staffIsUnlocked);
-                //Debug.Log("guestB: " + guestIsUnlocked);
-
-                staffButton.interactable = staffIsUnlocked;
-                guestButton.interactable = guestIsUnlocked;
+                restartGame();
             }
             if (CV == null)
             {
                 CV = GameObject.FindGameObjectWithTag("UI").GetComponent<StartCanvasBehavior>();
             }
         }
-
     }
 
-    private void FixedUpdate()
+    // Load game start scene
+    public void restartGame()
     {
+        SceneManager.LoadScene("GameStart");
+        isGameOver = false;
+        CV.GetComponent<Canvas>().enabled = true;
+
+        //Debug.Log("staffB: " + staffIsUnlocked);
+        //Debug.Log("guestB: " + guestIsUnlocked);
+
+        initUI();
+    }
+
+    public void initUI()
+    {
+        staffButton.interactable = staffIsUnlocked;
+        guestButton.interactable = guestIsUnlocked;
+
+        hostLivesText = GameObject.FindGameObjectWithTag("HostLivesText").GetComponent<Text>();
+        hostLivesText.text = hostLivesLeft.ToString();
     }
 
     // Set player choice for game mode
@@ -163,19 +166,26 @@ public class GameManager : MonoBehaviour
         currGameMode = mode;
     }
 
-    // Load Level
+    // Load Level, load first level in game mode
     // string playerCharacter: identifier for game mode between host, staff, and guest
     public void loadNextLevel(string playerCharacter)
     {
-        CV.GetComponent<Canvas>().enabled = false;
+        if (playerCharacter == "Host" && hostLivesLeft <= 0)
+        {
+            Debug.Log("no lives left, pay or wait");
+        }
+        else
+        {
+            CV.GetComponent<Canvas>().enabled = false;
 
-        currCharacter = playerCharacter;
+            currCharacter = playerCharacter;
 
-        lev = 1;    // start level 1
-        Debug.Log("loading next level for: " + playerCharacter);
-        SceneManager.LoadScene(currCharacter + "_Level" + lev);
+            lev = 1;    // start level 1
+            Debug.Log("loading next level for: " + playerCharacter);
+            SceneManager.LoadScene(currCharacter + "_Level" + lev);
+        }
     }
-    // Load Level
+    // Load Level, load next level in current mode
     public void loadNextLevel()
     {
         // Get current scene name
@@ -210,6 +220,7 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene(nextLevel);
     }
 
+    // FOR DEBUG TO ACTIVATE GAME MODE
     public void toggleGameModeEnabled(int mode) 
     {
         switch (mode)
@@ -275,6 +286,13 @@ public class GameManager : MonoBehaviour
             // Admission, lives
             case 0:
                 hostLivesLeft--;
+
+                // If game lost, return to home screen
+                if (hostLivesLeft <= 0)
+                {
+                    restartGame();
+                }
+
                 hostLivesText.text = hostLivesLeft.ToString();
                 break;
             // Persuasion
@@ -288,5 +306,49 @@ public class GameManager : MonoBehaviour
                 hostBribesText.text = hostBribesLeft.ToString();
                 break;
         }
+    }
+
+
+    // Initialize UI and appropriate variables for 
+    // playing game in host mode
+    public void initHostGame()
+    {
+        HostCanvas = GameObject.FindGameObjectWithTag("Host_HUD").GetComponent<Canvas>();
+        PlayerAwareness = GameObject.FindGameObjectWithTag("awarenessUI").GetComponent<Slider>();
+        // PlayerAwareness = HostCanvas.GetComponent<Slider>();
+
+        hostSaveButton1 = GameObject.FindGameObjectWithTag("HostSaveButton1").GetComponent<Button>();
+        hostSaveButton1.image.gameObject.SetActive(false);
+        hostSaveButton2 = GameObject.FindGameObjectWithTag("HostSaveButton2").GetComponent<Button>();
+        hostSaveButton2.image.gameObject.SetActive(false);
+        hostSaveButton3 = GameObject.FindGameObjectWithTag("HostSaveButton3").GetComponent<Button>();
+        hostSaveButton3.image.gameObject.SetActive(false);
+
+        hostLivesText = GameObject.FindGameObjectsWithTag("HostLivesText")[1].GetComponent<Text>();
+        hostLivesText.text = hostLivesLeft.ToString();
+        hostPersuadesText = GameObject.FindGameObjectWithTag("HostPersText").GetComponent<Text>();
+        hostPersuadesText.text = hostPersuadesLeft.ToString();
+        hostBribesText = GameObject.FindGameObjectWithTag("HostBribeText").GetComponent<Text>();
+        hostBribesText.text = hostBribesLeft.ToString();
+
+        updateAwarenessLevel(0.0f);
+
+        // Send player current level 
+        // to set awareness modifier
+        Player.setLevelMod(lev);
+    }
+
+    public IEnumerator regenLives()
+    {
+        while (hostLivesLeft < MAX_LIVES)
+        {
+            yield return new WaitForSeconds(1);
+            hostLivesLeft++;
+            hostLivesText.text = hostLivesLeft.ToString();
+            Debug.Log("regen lives: " + hostLivesLeft);
+        }
+        Debug.Log("regen DONE: " + hostLivesLeft);
+        lifeRegenIsActive = false;
+        yield return null;
     }
 }

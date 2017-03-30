@@ -16,6 +16,7 @@ public class SequencingPuzzle : MonoBehaviour {
     private bool isSolved;
     private bool isActive;
     private bool hasFailed;
+    private bool failHasInit;
 
     //Sequence generated for puzzle
     public int PUZZLE_LENGTH = 5;
@@ -27,6 +28,7 @@ public class SequencingPuzzle : MonoBehaviour {
         isSolved = false;
         isActive = false;
         hasFailed = false;
+        failHasInit = false;
 
         Player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerMovement>();
 
@@ -44,8 +46,11 @@ public class SequencingPuzzle : MonoBehaviour {
         if (isActive)
         {
             // If incorrect sequence entered
-            if(hasFailed)
+            if(hasFailed && !failHasInit)
             {
+                // Prevent multiple failed box selections
+                failHasInit = true;
+
                 // Lose double lives and reset level
                 Debug.Log("PUZZLE FAIL");
                 Player.threatSaveFailed();
@@ -79,7 +84,7 @@ public class SequencingPuzzle : MonoBehaviour {
                 {
                     // Reset threat level and 
                     // unpause game
-                    Debug.Log("PUZZLE SUCCESS");
+                    Debug.Log("PUZZLE SUCCESS2");
                     Player.threatSaveSuccessful();
                 }
                 // Timer expired before correct sequence input
@@ -114,8 +119,10 @@ public class SequencingPuzzle : MonoBehaviour {
         // Incorrect box selected for sequence
         else
         {
+            //Debug.Log("fail");
             hasFailed = true;
         }
+        
     }
 
     // At initialization, visually show player the sequence
@@ -159,7 +166,6 @@ public class SequencingPuzzle : MonoBehaviour {
         // to repeat color sequence
         isActive = true;
 
-
         Debug.Log("ACTIVE");
     }
 
@@ -177,9 +183,14 @@ public class SequencingPuzzle : MonoBehaviour {
         }
     }
 
-    //getter
+    // getter
     public bool getIsActive()
     {
         return isActive;
+    }
+    // getter if failure process has started
+    public bool getHasFailed()
+    {
+        return failHasInit;
     }
 }
