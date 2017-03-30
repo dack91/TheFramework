@@ -124,15 +124,14 @@ public class GameManager : MonoBehaviour
             {
                 // loads threat awareness UI
                 initHostGame();
+
             }
             //TODO: UI for staff and Guest for prestiege etc.
             else if (currCharacter == "Staff")
             {
-
             }
             else if (currCharacter == "Guest")
             {
-
             }
 
             // If game mode is active, 

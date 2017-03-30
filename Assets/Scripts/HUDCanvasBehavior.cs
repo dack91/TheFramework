@@ -46,13 +46,17 @@ public class HUDCanvasBehavior : MonoBehaviour
     public void loadStoreButton()
     {
         homeButton.image.gameObject.SetActive(false);
+        homeButton.interactable = false;
         storeButton.image.gameObject.SetActive(true);
+        storeButton.interactable = true;
     }
     // Show home and hide store buttons;
     public void loadHomeButton()
     {
         homeButton.image.gameObject.SetActive(true);
+        homeButton.interactable = true;
         storeButton.image.gameObject.SetActive(false);
+        storeButton.interactable = false;
     }
 
     // When home button is pressed, load GameStart scene
