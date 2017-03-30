@@ -61,7 +61,7 @@ public class HUDCanvasBehavior : MonoBehaviour
         // If threat level critical and player
         // quits to home screen instead of resolving
         // decrement life and return to home
-        if (GM.Player.getIsPaused())
+        if (GM.Player != null && GM.Player.getIsPaused())
         {
             GM.decrementHostItem(GM.HOST_LIVES_INDEX, 1);
         }
