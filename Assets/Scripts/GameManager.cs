@@ -24,7 +24,7 @@ public class GameManager : MonoBehaviour
     public PlayerMovement Player;
 
     public static int MAX_LIVES = 9;
-    public static int LIFE_REGEN_RATE = 1;
+    public int LIFE_REGEN_RATE = 20;
     private bool lifeRegenIsActive = false;
 
     // HOST Game Mode 
@@ -342,7 +342,7 @@ public class GameManager : MonoBehaviour
     {
         while (hostLivesLeft < MAX_LIVES)
         {
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(LIFE_REGEN_RATE);
             hostLivesLeft++;
             hostLivesText.text = hostLivesLeft.ToString();
             Debug.Log("regen lives: " + hostLivesLeft);
