@@ -45,7 +45,7 @@ public class GameManager : MonoBehaviour
     private Text hostBribesText;
     private Text hostPersuadesText;
     private int hostLivesLeft = MAX_LIVES;
-    private int hostBribesLeft = 8;
+    private int hostBribesLeft = 3;
     private int hostPersuadesLeft = 10;
     public int HOST_LIVES_INDEX = 0;
     public int HOST_PERSUADES_INDEX = 1;
@@ -173,6 +173,7 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene("GameStart");
         isGameOver = false;
         CV.GetComponent<Canvas>().enabled = true;
+        HUD.loadStoreButton();
 
         // Init player UI with nav and resources
         initUI();

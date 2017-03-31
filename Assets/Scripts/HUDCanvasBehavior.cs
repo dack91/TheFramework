@@ -71,7 +71,7 @@ public class HUDCanvasBehavior : MonoBehaviour
         }
 
         // Load game start scene
-        loadStoreButton();
+        //loadStoreButton();
         GM.restartGame();
 
         // Debug.Log("load home");
