@@ -167,7 +167,7 @@ public class PlayerMovement : MonoBehaviour
     // float duration: time step for lerp
     private void influenceAwareness(float start, float goal, float duration)
     {
-        // Note coroutine start time
+        // Note influence start time
         float startTime = Time.time;
 
         // If the player died, reset animation
@@ -197,20 +197,42 @@ public class PlayerMovement : MonoBehaviour
                 break;
             // Persuasion, lose persuade, start minipuzzle
             case 1:
-                Debug.Log("persuade chosen");
-                GM.decrementHostItem(GM.HOST_PERSUADES_INDEX, 1);
-                GM.endHostSave();
-                //Debug.Log("starting minigame");
+                // Check if resource is availabe
+                if (GM.canUseResource(GM.HOST_PERSUADES_INDEX))
+                {
+                    Debug.Log("persuade chosen");
+                    GM.decrementHostItem(GM.HOST_PERSUADES_INDEX, 1);
+                    GM.endHostSave();
+                    //Debug.Log("starting minigame");
 
-                GameObject puzzleClone = Instantiate(puzzle);
+                    GameObject puzzleClone = Instantiate(puzzle);
 
-                // isSolvingPuzzle = true;
-                // threatSaveSuccessful();
+                    // isSolvingPuzzle = true;
+                    // threatSaveSuccessful();
+                }
+                // Apply punishment if resource overdrafted
+                else
+                {
+                    threatSaveFailed();
+                    GM.endHostSave();
+                    isPaused = false;
+                }
                 break;
             // Bribe, lose bribe
             case 2:
-                threatSaveSuccessful();
-                GM.decrementHostItem(GM.HOST_BRIBES_INDEX, 1);
+                // Check if resource is availabe
+                if( GM.canUseResource(GM.HOST_BRIBES_INDEX))
+                {
+                    threatSaveSuccessful();
+                    GM.decrementHostItem(GM.HOST_BRIBES_INDEX, 1);
+                }
+                // Apply punishment if resource overdrafted
+                else
+                {
+                    threatSaveFailed();
+                    GM.endHostSave();
+                    isPaused = false;
+                }
                 break;
         }
     }

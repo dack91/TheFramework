@@ -341,6 +341,7 @@ public class GameManager : MonoBehaviour
                 // If game lost, return to home screen
                 if (hostLivesLeft <= 0)
                 {
+                    hostLivesLeft = 0;
                     restartGame();
                 }
                 // If buying lives, limit addition to max
@@ -359,6 +360,36 @@ public class GameManager : MonoBehaviour
                 break;
         }
         refreshHUDValues();
+    }
+
+    // Check if player has resource 
+    public bool canUseResource(int index)
+    {
+        switch (index)
+        {
+            // Lives
+            case 0:
+                if (hostLivesLeft > 0)
+                {
+                    return true;
+                }        
+                break;
+            // Persuasion
+            case 1:
+                if (hostPersuadesLeft > 0)
+                {
+                    return true;
+                }
+                break;
+            // Bribe
+            case 2:
+                if (hostBribesLeft > 0)
+                {
+                    return true;
+                }
+                break;
+        }
+        return false;
     }
 
     // Initialize UI and appropriate variables for 
