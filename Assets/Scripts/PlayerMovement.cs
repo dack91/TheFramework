@@ -134,6 +134,30 @@ public class PlayerMovement : MonoBehaviour
         other.gameObject.GetComponent<Renderer>().enabled = false;
     }
 
+    // Register collisions with character controller
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        // If Rugen character collides with OOP to select them as a traitor
+        if (hit.gameObject.tag == "OOP_NPC")
+        {
+        Debug.Log("check traitor");
+            // Check if the selected OOP is a traitor
+            if (hit.gameObject.GetComponent<OOPIdentity>().inspectOOP())
+            {
+                Debug.Log("LEVEL WON");
+                GM.loadNextLevel();
+            }
+            // Rugen inspection was incorrect, decrement persuade
+            else
+            {
+                if (GM.canUseResource(GM.HOST_PERSUADES_INDEX))
+                {
+                    GM.decrementHostItem(GM.HOST_PERSUADES_INDEX, 1);
+                }
+            }
+        }
+    }
+
     // 2 directional player movement
     public void movePlayer(float dirX, float dirY)
     {
