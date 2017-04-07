@@ -152,11 +152,11 @@ public class PlayerMovement : MonoBehaviour
         // If Rugen character collides with OOP to select them as a traitor
         if (hit.gameObject.tag == "OOP_NPC")
         {
-        Debug.Log("check traitor");
+            //Debug.Log("check traitor");
             // Check if the selected OOP is a traitor
             if (hit.gameObject.GetComponent<OOPIdentity>().inspectOOP())
             {
-                Debug.Log("LEVEL WON");
+             //   Debug.Log("LEVEL WON");
                 GM.loadNextLevel();
             }
             // Rugen inspection was incorrect, decrement persuade
@@ -169,6 +169,7 @@ public class PlayerMovement : MonoBehaviour
             }
         }
     }
+    
 
     // 2 directional player movement
     public void movePlayer(float dirX, float dirY)

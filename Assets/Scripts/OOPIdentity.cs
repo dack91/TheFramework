@@ -26,24 +26,6 @@ public class OOPIdentity : MonoBehaviour {
 		
 	}
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        //if (collision.gameObject.tag == "Player")
-        //{
-        //    Debug.Log("check traitor");
-        //    if (inspectOOP())
-        //    {
-        //        Debug.Log("LEVEL WON");
-        //    }
-        //    // Rugen inspection was incorrect, decrement persuade
-        //    else
-        //    {
-        //        GM.decrementHostItem(GM.HOST_PERSUADES_INDEX, 1);
-        //    }
-        //}
-    }
-
-
     // Check if this OOP is trying to escape
     public bool inspectOOP()
     {
