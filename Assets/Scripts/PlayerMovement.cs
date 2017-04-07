@@ -134,6 +134,18 @@ public class PlayerMovement : MonoBehaviour
         other.gameObject.GetComponent<Renderer>().enabled = false;
     }
 
+    // Called when player enters trigger collider
+    private void OnTriggerEnter(Collider other)
+    {
+        // If trigger is for a pickup, add resource and destroy pickup
+        if (other.gameObject.tag == "Pickup_Div")
+        {
+            GM.decrementHostItem(GM.HOST_PERSUADES_INDEX, -2);
+            Destroy(other.gameObject);
+        }
+
+    }
+
     // Register collisions with character controller
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
