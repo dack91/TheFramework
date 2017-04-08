@@ -143,13 +143,13 @@ public class GameManager : MonoBehaviour
                 float yMove = 0;
 
                 // Move Vertical
-                if ((yMove = Input.GetAxis("Vertical")) != 0)
+                if ((yMove = Input.acceleration.y) != 0)
                 {
                     //  Debug.Log("y movement: " + Input.GetAxis("Vertical"));
                     Player.movePlayer(0, yMove);
                 }
                 // Move Horizontal
-                if ((xMove = Input.GetAxis("Horizontal")) != 0)
+                if ((xMove = Input.acceleration.x) != 0)
                 {
                     // Debug.Log("x movement: " + Input.GetAxis("Horizontal"));
                     Player.movePlayer(xMove, 0);
