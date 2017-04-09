@@ -392,6 +392,36 @@ public class GameManager : MonoBehaviour
         return false;
     }
 
+    // Check if player has resource 
+    public bool canBuyResource(int index)
+    {
+        switch (index)
+        {
+            // Lives
+            case 0:
+                if (hostLivesLeft < MAX_LIVES)
+                {
+                    return true;
+                }
+                break;
+            // Persuasion
+            case 1:
+                if (hostPersuadesLeft < int.MaxValue)
+                {
+                    return true;
+                }
+                break;
+            // Bribe
+            case 2:
+                if (hostBribesLeft < int.MaxValue)
+                {
+                    return true;
+                }
+                break;
+        }
+        return false;
+    }
+
     // Initialize UI and appropriate variables for 
     // playing game in host mode
     public void initHostGame()
